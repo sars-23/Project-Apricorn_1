@@ -3,5 +3,6 @@
 .idea/
 .vscode/
 target/
+.tools/
 .env
 data/
