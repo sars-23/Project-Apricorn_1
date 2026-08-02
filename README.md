@@ -56,3 +56,27 @@ Components use constructor injection. The current security configuration permits
 cd backend
 mvn test
 ```
+
+## Authentication
+
+Set a strong `JWT_SECRET` (at least 32 characters) before starting the backend. Optionally set `JWT_EXPIRATION` in milliseconds; it defaults to one hour. Do not commit a real signing secret.
+
+```bash
+export JWT_SECRET="replace-with-a-long-random-secret"
+cd backend
+mvn spring-boot:run
+```
+
+Register with `POST /api/v1/auth/register`:
+
+```json
+{"username":"apricorn_user","email":"user@example.com","password":"SecurePassword123!"}
+```
+
+Login at `POST /api/v1/auth/login` with the email and password. The response includes a Bearer access token. Supply it on protected calls:
+
+```text
+Authorization: Bearer <accessToken>
+```
+
+`GET /api/v1/users/me` requires a valid token. `GET /api/v1/admin/test` additionally requires an `ADMIN` role. See [security documentation](docs/security.md) for the authentication and authorization flow.
