@@ -17,14 +17,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler({ConflictException.class, DuplicateProblemException.class, DuplicateTagException.class})
+    @ExceptionHandler({ConflictException.class, DuplicateProblemException.class, DuplicateTagException.class, InvalidSubmissionStateException.class})
     ResponseEntity<ApiError> handleConflict(Exception exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("CONFLICT", exception.getMessage(), Instant.now()));
     }
 
-    @ExceptionHandler({NoSuchElementException.class, ProblemNotFoundException.class, TagNotFoundException.class, TestCaseNotFoundException.class})
+    @ExceptionHandler({NoSuchElementException.class, ProblemNotFoundException.class, TagNotFoundException.class, TestCaseNotFoundException.class, SubmissionNotFoundException.class})
     ResponseEntity<ApiError> handleNotFound(Exception exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("NOT_FOUND", exception.getMessage(), Instant.now()));
+    }
+
+    @ExceptionHandler(UnauthorizedSubmissionAccessException.class)
+    ResponseEntity<ApiError> handleForbidden(UnauthorizedSubmissionAccessException exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("FORBIDDEN", exception.getMessage(), Instant.now()));
+    }
+
+    @ExceptionHandler(InvalidSubmissionException.class)
+    ResponseEntity<ApiError> handleInvalidSubmission(InvalidSubmissionException exception) {
+        return ResponseEntity.badRequest().body(new ApiError("VALIDATION_ERROR", exception.getMessage(), Instant.now()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
