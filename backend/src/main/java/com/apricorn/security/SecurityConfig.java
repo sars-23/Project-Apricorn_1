@@ -41,7 +41,8 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/auth/**", "/api/v1/health", "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/problems/**", "/api/v1/tags/**").permitAll()
+                        .requestMatchers("/api/v1/problems/*/submissions/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/problems", "/api/v1/problems/*", "/api/v1/tags/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
