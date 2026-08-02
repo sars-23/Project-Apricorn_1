@@ -22,3 +22,11 @@ logging:
 jwt:
   secret: ${JWT_SECRET}
   expiration-ms: ${JWT_EXPIRATION:3600000}
+
+judge:
+  mode: ${JUDGE_MODE:stub}
+  java-image: eclipse-temurin:21-jdk
+  max-output-bytes: 1048576
+  compile-timeout-ms: 10000
+  container-memory-mb: 256
+  container-cpus: 0.5
