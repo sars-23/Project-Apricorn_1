@@ -5,14 +5,16 @@ import com.apricorn.submission.model.JudgeResult;
 import com.apricorn.submission.service.SubmissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 /**
- * Temporary deterministic stub judge implementation for Sprint 3.
+ * Temporary deterministic stub judge implementation for Sprint 3/4 development fallback.
  * DO NOT execute arbitrary user code on host machine.
  */
 @Service
+@ConditionalOnProperty(name = "judge.mode", havingValue = "stub", matchIfMissing = true)
 public class StubJudgeService implements JudgeService {
     private static final Logger log = LoggerFactory.getLogger(StubJudgeService.class);
     private final SubmissionService submissionService;
