@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.apricorn.controller.HealthController;
 import com.apricorn.security.jwt.JwtAuthenticationFilter;
-import com.apricorn.security.jwt.JwtService;
+import com.apricorn.security.jwt.JwtServiceImpl;
 import com.apricorn.service.HealthService;
 import com.apricorn.user.controller.AdminController;
 import com.apricorn.user.controller.UserController;
@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import({
         SecurityConfig.class,
         JwtAuthenticationFilter.class,
-        JwtService.class,
+        JwtServiceImpl.class,
         RestAuthenticationEntryPoint.class,
         RestAccessDeniedHandler.class
 })

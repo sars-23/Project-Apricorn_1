@@ -1,7 +1,10 @@
 package com.apricorn.submission.repository;
 
+import com.apricorn.problem.entity.Difficulty;
 import com.apricorn.submission.entity.Submission;
 import com.apricorn.submission.entity.Verdict;
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,4 +36,33 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long>, J
 
     @Query("SELECT COUNT(DISTINCT s.problem.id) FROM Submission s WHERE s.user.id = :userId AND s.verdict = com.apricorn.submission.entity.Verdict.ACCEPTED")
     long countDistinctSolvedProblemsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT COUNT(DISTINCT s.problem.id) FROM Submission s WHERE s.user.id = :userId AND s.verdict = com.apricorn.submission.entity.Verdict.ACCEPTED AND s.problem.difficulty = :difficulty")
+    long countDistinctSolvedProblemsByUserIdAndDifficulty(@Param("userId") Long userId, @Param("difficulty") Difficulty difficulty);
+
+    @Query("SELECT DISTINCT s.submittedAt FROM Submission s WHERE s.user.id = :userId ORDER BY s.submittedAt ASC")
+    List<Instant> findSubmissionTimestampsByUserId(@Param("userId") Long userId);
+
+    @EntityGraph(attributePaths = {"problem"})
+    List<Submission> findTop10ByUserIdOrderBySubmittedAtDesc(Long userId);
+
+    long countByProblemId(Long problemId);
+
+    long countByProblemIdAndVerdict(Long problemId, Verdict verdict);
+
+    @Query("SELECT COUNT(DISTINCT s.user.id) FROM Submission s WHERE s.problem.id = :problemId")
+    long countDistinctAttemptedUsersByProblemId(@Param("problemId") Long problemId);
+
+    @Query("SELECT COUNT(DISTINCT s.user.id) FROM Submission s WHERE s.problem.id = :problemId AND s.verdict = com.apricorn.submission.entity.Verdict.ACCEPTED")
+    long countDistinctSolvedUsersByProblemId(@Param("problemId") Long problemId);
+
+    @Query("SELECT COUNT(DISTINCT s.user.id) FROM Submission s WHERE s.submittedAt >= :startOfDay")
+    long countActiveUsersToday(@Param("startOfDay") Instant startOfDay);
+
+    @Query("SELECT COUNT(s) FROM Submission s WHERE s.submittedAt >= :startOfDay")
+    long countSubmissionsToday(@Param("startOfDay") Instant startOfDay);
+
+    long countByVerdict(Verdict verdict);
+
+    long countByLanguage(com.apricorn.submission.entity.Language language);
 }

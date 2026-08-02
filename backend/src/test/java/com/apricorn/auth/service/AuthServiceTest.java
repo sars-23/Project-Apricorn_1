@@ -8,7 +8,7 @@ import com.apricorn.auth.dto.LoginRequest;
 import com.apricorn.auth.dto.RegisterRequest;
 import com.apricorn.exception.ConflictException;
 import com.apricorn.security.jwt.JwtProperties;
-import com.apricorn.security.jwt.JwtService;
+import com.apricorn.security.jwt.JwtServiceImpl;
 import com.apricorn.user.entity.Role;
 import com.apricorn.user.entity.User;
 import com.apricorn.user.mapper.UserMapper;
@@ -25,7 +25,7 @@ class AuthServiceTest {
     @BeforeEach void setUp() {
         users = mock(UserRepository.class);
         JwtProperties properties = new JwtProperties(); properties.setSecret("01234567890123456789012345678901"); properties.setExpirationMs(3600000);
-        service = new AuthServiceImpl(users, new BCryptPasswordEncoder(), mock(AuthenticationManager.class), new JwtService(properties), properties, new UserMapper());
+        service = new AuthServiceImpl(users, new BCryptPasswordEncoder(), mock(AuthenticationManager.class), new JwtServiceImpl(properties), properties, new UserMapper());
     }
     @Test void registersUserWithBcryptHash() {
         when(users.save(any())).thenAnswer(invocation -> invocation.getArgument(0));

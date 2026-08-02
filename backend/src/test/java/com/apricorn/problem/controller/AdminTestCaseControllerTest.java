@@ -16,7 +16,7 @@ import com.apricorn.security.RestAccessDeniedHandler;
 import com.apricorn.security.RestAuthenticationEntryPoint;
 import com.apricorn.security.SecurityConfig;
 import com.apricorn.security.jwt.JwtAuthenticationFilter;
-import com.apricorn.security.jwt.JwtService;
+import com.apricorn.security.jwt.JwtServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
@@ -35,7 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import({
         SecurityConfig.class,
         JwtAuthenticationFilter.class,
-        JwtService.class,
+        JwtServiceImpl.class,
         RestAuthenticationEntryPoint.class,
         RestAccessDeniedHandler.class
 })

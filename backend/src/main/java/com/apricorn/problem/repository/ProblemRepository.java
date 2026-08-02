@@ -1,5 +1,6 @@
 package com.apricorn.problem.repository;
 
+import com.apricorn.problem.entity.Difficulty;
 import com.apricorn.problem.entity.Problem;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -22,4 +23,6 @@ public interface ProblemRepository extends JpaRepository<Problem, Long>, JpaSpec
 
     @EntityGraph(attributePaths = {"tags", "createdBy"})
     Optional<Problem> findDetailBySlug(String slug);
+
+    long countByDifficulty(Difficulty difficulty);
 }
