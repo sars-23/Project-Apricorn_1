@@ -25,7 +25,7 @@ class AuthServiceTest {
     @BeforeEach void setUp() {
         users = mock(UserRepository.class);
         JwtProperties properties = new JwtProperties(); properties.setSecret("01234567890123456789012345678901"); properties.setExpirationMs(3600000);
-        service = new AuthService(users, new BCryptPasswordEncoder(), mock(AuthenticationManager.class), new JwtService(properties), properties, new UserMapper());
+        service = new AuthServiceImpl(users, new BCryptPasswordEncoder(), mock(AuthenticationManager.class), new JwtService(properties), properties, new UserMapper());
     }
     @Test void registersUserWithBcryptHash() {
         when(users.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
