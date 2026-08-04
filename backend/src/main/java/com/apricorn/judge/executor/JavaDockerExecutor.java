@@ -92,6 +92,13 @@ public class JavaDockerExecutor implements LanguageExecutor {
                     .toList();
 
             int totalCases = sortedTestCases.size();
+            if (totalCases == 0) {
+                return new JudgeResult(
+                        Verdict.INTERNAL_ERROR, 0, 0, 0, 0,
+                        "Judge Configuration Error: No test cases found for this problem."
+                );
+            }
+
             int passedCases = 0;
             long maxExecutionTimeMs = 0;
 

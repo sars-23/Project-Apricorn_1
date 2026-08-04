@@ -1,35 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('login-error');
-            
-            try {
-                const response = await fetch('/api/v1/auth/authenticate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    document.cookie = `jwt_token=${data.token}; path=/; max-age=86400; samesite=strict`;
-                    window.location.href = '/';
-                } else {
-                    errorDiv.textContent = 'Invalid email or password';
-                    errorDiv.classList.remove('d-none');
-                }
-            } catch (err) {
-                errorDiv.textContent = 'Network error occurred. Please try again.';
-                errorDiv.classList.remove('d-none');
-            }
-        });
-    }
-
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -140,6 +110,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function logout() {
-    document.cookie = "jwt_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    window.location.href = '/';
+    window.location.href = '/logout';
 }

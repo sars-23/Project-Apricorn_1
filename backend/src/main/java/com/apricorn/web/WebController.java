@@ -11,6 +11,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.apricorn.auth.service.AuthService;
+import com.apricorn.auth.dto.LoginRequest;
+import com.apricorn.auth.dto.AuthResponse;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.PostMapping;
+
 @Controller
 public class WebController {
 
@@ -18,13 +26,15 @@ public class WebController {
     private final UserService userService;
     private final ProblemService problemService;
     private final TagService tagService;
+    private final AuthService authService;
 
     public WebController(AnalyticsService analyticsService, UserService userService, ProblemService problemService,
-            TagService tagService) {
+            TagService tagService, AuthService authService) {
         this.analyticsService = analyticsService;
         this.userService = userService;
         this.problemService = problemService;
         this.tagService = tagService;
+        this.authService = authService;
     }
 
     @GetMapping("/")
@@ -35,6 +45,40 @@ public class WebController {
     @GetMapping("/login")
     public String login() {
         return "pages/login";
+    }
+
+    @PostMapping("/login")
+    public String loginSubmit(
+            @RequestParam String email, 
+            @RequestParam String password, 
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes) {
+        try {
+            LoginRequest loginRequest = new LoginRequest(email, password);
+            AuthResponse authResponse = authService.login(loginRequest);
+            
+            Cookie cookie = new Cookie("jwt_token", authResponse.accessToken());
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            cookie.setAttribute("SameSite", "Lax");
+            cookie.setMaxAge(86400);
+            
+            response.addCookie(cookie);
+            return "redirect:/problems";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Invalid email or password");
+            return "redirect:/login";
+        }
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("jwt_token", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        return "redirect:/";
     }
 
     @GetMapping("/register")
