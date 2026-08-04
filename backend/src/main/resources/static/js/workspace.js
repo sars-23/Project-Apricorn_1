@@ -27,7 +27,20 @@ require(['vs/editor/editor.main'], function() {
         fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
         scrollBeyondLastLine: false,
         roundedSelection: false,
-        padding: { top: 16, bottom: 16 }
+        padding: { top: 16, bottom: 16 },
+        formatOnType: true,
+        formatOnPaste: true,
+        autoIndent: "full",
+        bracketPairColorization: { enabled: true },
+        smoothScrolling: true
+    });
+
+    // Add Ctrl/Cmd + Enter to submit
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function() {
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn && !submitBtn.disabled) {
+            submitCode();
+        }
     });
 
     // Auto-save draft to local storage
@@ -59,15 +72,20 @@ function showResult() {
 
 function updateResultUI(status, detailsHtml, colorClass) {
     const resultStatus = document.getElementById('resultStatus');
-    resultStatus.textContent = status;
+    resultStatus.innerHTML = status;
     resultStatus.className = `mb-2 fs-5 font-monospace fw-bold ${colorClass}`;
     
     document.getElementById('resultDetails').innerHTML = detailsHtml;
 }
 
 async function submitCode() {
-    const code = editor.getValue();
-    if (!code || code.trim() === '') {
+    if (!editor) {
+        alert('Editor is not initialized yet. Please wait a moment and try again.');
+        return;
+    }
+
+    const sourceCode = editor.getValue();
+    if (!sourceCode || sourceCode.trim() === '') {
         alert('Please write some code before submitting.');
         return;
     }
@@ -82,48 +100,56 @@ async function submitCode() {
     submitBtnText.textContent = ' Submitting...';
 
     showResult();
-    updateResultUI('SUBMITTING...', 'Sending code to the judge...', 'text-secondary');
+    updateResultUI('Queued...', 'Sending code to the judge...', 'text-secondary');
 
     try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            updateResultUI('UNAUTHORIZED', 'You must be logged in to submit code. Please <a href="/login">login here</a>.', 'text-danger');
-            resetSubmitBtn();
-            return;
-        }
+        const payload = {
+            language: 'JAVA',
+            sourceCode: sourceCode
+        };
 
-        const response = await fetch(`/api/v1/problems/${PROBLEM_ID}/submissions`, {
+        const response = await fetch(`/api/v1/problems/${PROBLEM_SLUG}/submissions`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                language: 'JAVA',
-                code: code
-            })
+            body: JSON.stringify(payload)
         });
 
         if (response.status === 202) {
-            const location = response.headers.get('Location');
-            // location might be a full URL or relative. We can parse it.
-            const parts = location.split('/');
-            currentSubmissionId = parts[parts.length - 1];
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                updateResultUI('ERROR', 'Submission was received but the response could not be processed.', 'text-danger');
+                resetSubmitBtn();
+                return;
+            }
             
-            updateResultUI('PENDING', 'Submission received. Waiting for judge...', 'text-warning');
-            startPolling();
+            if (data && data.submissionId) {
+                currentSubmissionId = data.submissionId;
+                updateResultUI('Queued', 'Submission received. Waiting for judge...', 'text-warning');
+                startPolling();
+            } else {
+                updateResultUI('ERROR', 'Submission created but no submission identifier was returned.', 'text-danger');
+                resetSubmitBtn();
+            }
         } else if (response.status === 401) {
             updateResultUI('UNAUTHORIZED', 'Session expired. Please <a href="/login">login again</a>.', 'text-danger');
             resetSubmitBtn();
         } else {
-            const err = await response.json();
-            updateResultUI('ERROR', `Failed to submit: ${err.message || 'Unknown error'}`, 'text-danger');
+            let errMessage = 'Unknown error';
+            try {
+                const err = await response.json();
+                errMessage = err.message || err.error || errMessage;
+            } catch (e) {}
+            updateResultUI('ERROR', `Failed to submit: ${errMessage}`, 'text-danger');
             resetSubmitBtn();
         }
 
     } catch (error) {
         console.error('Submit error:', error);
-        updateResultUI('ERROR', 'Network error while submitting. Please try again.', 'text-danger');
+        updateResultUI('ERROR', 'Unable to connect to the server.', 'text-danger');
         resetSubmitBtn();
     }
 }
@@ -133,12 +159,7 @@ function startPolling() {
 
     pollInterval = setInterval(async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`/api/v1/problems/${PROBLEM_ID}/submissions/${currentSubmissionId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            const response = await fetch(`/api/v1/submissions/${currentSubmissionId}`);
 
             if (response.ok) {
                 const data = await response.json();
@@ -154,8 +175,11 @@ function startPolling() {
                     updateResultUI('INTERNAL ERROR', 'The judge encountered an internal error processing your submission.', 'text-danger');
                     resetSubmitBtn();
                 } else {
-                    // PENDING or RUNNING
-                    updateResultUI(data.status, 'Executing test cases...', 'text-warning');
+                    const statusText = data.status === 'RUNNING' ? 'Running' : 'Pending';
+                    updateResultUI(statusText, 'Executing test cases...', 'text-info');
+                    
+                    const submitBtnText = document.getElementById('submitBtnText');
+                    if (submitBtnText) submitBtnText.textContent = ' Running...';
                 }
             } else {
                 clearInterval(pollInterval);
@@ -165,33 +189,72 @@ function startPolling() {
             }
         } catch (error) {
             console.error('Polling error:', error);
+            clearInterval(pollInterval);
+            pollInterval = null;
+            updateResultUI('ERROR', 'Submission created, but status could not be retrieved.', 'text-danger');
+            resetSubmitBtn();
         }
     }, 1500); // Poll every 1.5s
 }
 
 function renderFinalVerdict(data) {
     const verdict = data.verdict;
-    let colorClass = 'text-danger';
-    if (verdict === 'ACCEPTED') colorClass = 'text-success';
-    else if (verdict === 'WRONG_ANSWER') colorClass = 'text-danger';
-    else if (verdict === 'COMPILATION_ERROR') colorClass = 'text-warning';
-    
-    let detailsHtml = `<div class="mb-3">
-        <div class="row">
-            <div class="col-6"><strong>Time:</strong> ${data.executionTimeMs != null ? data.executionTimeMs + ' ms' : 'N/A'}</div>
-            <div class="col-6"><strong>Memory:</strong> ${data.memoryUsedMb != null ? data.memoryUsedMb + ' MB' : 'N/A'}</div>
-        </div>
-    </div>`;
+    let colorClass = 'text-primary';
+    let iconHtml = '';
+    let verdictText = verdict ? verdict.replace(/_/g, ' ') : 'UNKNOWN';
 
-    if (verdict === 'COMPILATION_ERROR' && data.errorMessage) {
-        detailsHtml += `<h6>Compilation Error:</h6>
-        <pre class="bg-dark p-2 text-danger border border-danger">${data.errorMessage}</pre>`;
-    } else if (data.errorMessage) {
-        detailsHtml += `<h6>Error Details:</h6>
-        <pre class="bg-dark p-2 text-warning border border-warning">${data.errorMessage}</pre>`;
+    if (verdict === 'ACCEPTED') {
+        colorClass = 'text-success';
+        iconHtml = '<i class="bi bi-check-lg"></i>';
+    } else if (verdict === 'WRONG_ANSWER' || verdict === 'RUNTIME_ERROR') {
+        colorClass = 'text-danger';
+        iconHtml = '<i class="bi bi-x-lg"></i>';
+    } else if (verdict === 'COMPILATION_ERROR' || verdict === 'TIME_LIMIT_EXCEEDED') {
+        colorClass = 'text-warning';
+        iconHtml = '<i class="bi bi-exclamation-triangle"></i>';
+    } else if (verdict === 'INTERNAL_ERROR') {
+        colorClass = 'text-danger';
+        iconHtml = '<i class="bi bi-bug"></i>';
+        verdictText = 'Judge Error';
     }
 
-    updateResultUI(verdict.replace('_', ' '), detailsHtml, colorClass);
+    const timeText = data.executionTimeMs != null ? (data.executionTimeMs === 0 ? '< 1 ms' : `${data.executionTimeMs} ms`) : 'N/A';
+    const memoryText = data.memoryUsedKb != null ? `${data.memoryUsedKb} KB` : 'Not measured';
+    const passedTests = data.passedTestCases != null ? data.passedTestCases : 0;
+    const totalTests = data.totalTestCases != null ? data.totalTestCases : 0;
+    
+    let detailsHtml = `
+        <div class="row g-3 mt-1 text-light">
+            <div class="col-4">
+                <div class="text-secondary small">Tests Passed</div>
+                <div class="fs-6 fw-bold">${passedTests} / ${totalTests}</div>
+            </div>
+            <div class="col-4">
+                <div class="text-secondary small">Runtime</div>
+                <div class="fs-6 fw-bold">${timeText}</div>
+            </div>
+            <div class="col-4">
+                <div class="text-secondary small">Memory</div>
+                <div class="fs-6 fw-bold">${memoryText}</div>
+            </div>
+        </div>
+    `;
+
+    if (verdict === 'COMPILATION_ERROR' && data.errorMessage) {
+        detailsHtml += `
+        <div class="mt-3">
+            <div class="text-secondary small mb-1">Compilation Error</div>
+            <pre class="bg-black p-3 text-warning border border-secondary rounded font-monospace" style="white-space: pre-wrap; font-size: 0.85rem;">${data.errorMessage}</pre>
+        </div>`;
+    } else if (data.errorMessage && verdict !== 'INTERNAL_ERROR') {
+        detailsHtml += `
+        <div class="mt-3">
+            <div class="text-secondary small mb-1">Error Details</div>
+            <pre class="bg-black p-3 text-danger border border-secondary rounded font-monospace" style="white-space: pre-wrap; font-size: 0.85rem;">${data.errorMessage}</pre>
+        </div>`;
+    }
+
+    updateResultUI(`${iconHtml} ${verdictText}`, detailsHtml, colorClass);
 }
 
 function resetSubmitBtn() {

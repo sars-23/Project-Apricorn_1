@@ -43,7 +43,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler))
                 .authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/error").permitAll()
+                        .requestMatchers("/", "/login", "/logout", "/register", "/css/**", "/js/**", "/error").permitAll()
                         .requestMatchers("/problems", "/problems/**").permitAll()
                         .requestMatchers("/dashboard", "/profile").authenticated()
                         .requestMatchers("/api/v1/auth/**", "/api/v1/health", "/swagger-ui/**", "/swagger-ui.html",

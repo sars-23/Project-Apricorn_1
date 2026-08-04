@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html th:replace="~{layout :: html}">
+
 <head>
     <th:block th:fragment="headContent">
         <title>Problems - Project Apricorn</title>
     </th:block>
 </head>
+
 <body>
     <div th:fragment="mainContent">
-        
+
         <div class="container py-4 my-4">
-            
+
             <div class="row align-items-center mb-4">
                 <div class="col-md-6 mb-3 mb-md-0">
                     <h2 class="fw-bold mb-0">Problems</h2>
@@ -22,12 +24,17 @@
                 <div class="row g-3 align-items-center">
                     <div class="col-12 col-md-4">
                         <div class="input-group">
-                            <span class="input-group-text bg-dark-glass border-secondary border-opacity-50 text-muted"><i class="bi bi-search"></i></span>
-                            <input type="text" id="searchProblem" class="form-control bg-dark-glass border-secondary border-opacity-50 text-white" placeholder="Search problems by title...">
+                            <span
+                                class="input-group-text bg-dark-glass border-secondary border-opacity-50 text-muted"><i
+                                    class="bi bi-search"></i></span>
+                            <input type="text" id="searchProblem"
+                                class="form-control bg-dark-glass border-secondary border-opacity-50 text-white"
+                                placeholder="Search problems by title...">
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <select id="filterDifficulty" class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
+                        <select id="filterDifficulty"
+                            class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
                             <option value="All">Difficulty: All</option>
                             <option value="EASY">Easy</option>
                             <option value="MEDIUM">Medium</option>
@@ -35,13 +42,15 @@
                         </select>
                     </div>
                     <div class="col-6 col-md-3">
-                        <select id="filterTag" class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
+                        <select id="filterTag"
+                            class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
                             <option value="All">Tags: All</option>
                             <option th:each="tag : ${tags}" th:value="${tag.slug}" th:text="${tag.name}">Tag</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-2">
-                        <select id="sortProblem" class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
+                        <select id="sortProblem"
+                            class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
                             <option value="newest">Sort: Newest</option>
                             <option value="oldest">Sort: Oldest</option>
                             <option value="title">Sort: Title</option>
@@ -60,38 +69,39 @@
 
             <!-- Problem List -->
             <div id="problemContainer" class="row g-3 mb-4">
-                <div th:each="problem : ${problemPage.content}" 
-                     class="col-12 problem-card" 
-                     th:data-id="${problem.id}" 
-                     th:data-title="${#strings.toLowerCase(problem.title)}" 
-                     th:data-difficulty="${problem.difficulty}" 
-                     th:data-tags="${#strings.listJoin(problem.tags.![slug], ',')}">
-                    
+                <div th:each="problem : ${problemPage.content}" class="col-12 problem-card" th:data-id="${problem.id}"
+                    th:data-title="${#strings.toLowerCase(problem.title)}" th:data-difficulty="${problem.difficulty}"
+                    th:data-tags="${#strings.listJoin(problem.tags.![slug], ',')}">
+
                     <div class="card glass border-0 border-start border-4 shadow-sm p-3 transition-transform"
-                         th:classappend="${problem.difficulty.name() == 'EASY' ? 'border-success' : (problem.difficulty.name() == 'MEDIUM' ? 'border-warning' : 'border-danger')}">
+                        th:classappend="${problem.difficulty.name() == 'EASY' ? 'border-success' : (problem.difficulty.name() == 'MEDIUM' ? 'border-warning' : 'border-danger')}">
                         <div class="row align-items-center">
                             <div class="col-md-7 mb-3 mb-md-0 d-flex align-items-center">
-                                <div class="me-3 fs-5 fw-bold text-muted font-monospace" th:text="${'#' + problem.id}">#1</div>
+                                <div class="me-3 fs-5 fw-bold text-muted font-monospace" th:text="${'#' + problem.id}">
+                                    #1</div>
                                 <div>
                                     <h5 class="fw-bold mb-1">
-                                        <a href="#" class="text-white text-decoration-none" th:text="${problem.title}">Problem Title</a>
+                                        <a href="#" class="text-white text-decoration-none"
+                                            th:text="${problem.title}">Problem Title</a>
                                     </h5>
                                     <div class="d-flex flex-wrap gap-2 align-items-center">
-                                        <span class="badge" 
-                                              th:classappend="${problem.difficulty.name() == 'EASY' ? 'bg-success' : (problem.difficulty.name() == 'MEDIUM' ? 'bg-warning' : 'bg-danger')}"
-                                              th:text="${problem.difficulty.name()}">EASY</span>
-                                        <span class="badge bg-secondary border border-secondary" th:each="tag : ${problem.tags}" th:text="${tag.name}">Tag</span>
+                                        <span class="badge"
+                                            th:classappend="${problem.difficulty.name() == 'EASY' ? 'bg-success' : (problem.difficulty.name() == 'MEDIUM' ? 'bg-warning' : 'bg-danger')}"
+                                            th:text="${problem.difficulty.name()}">EASY</span>
+                                        <span class="badge bg-secondary border border-secondary"
+                                            th:each="tag : ${problem.tags}" th:text="${tag.name}">Tag</span>
                                         <span class="text-muted small"><i class="bi bi-clock me-1"></i> 1000ms</span>
                                         <span class="text-muted small"><i class="bi bi-memory me-1"></i> 256MB</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-5 d-flex flex-column flex-md-row justify-content-md-end align-items-md-center gap-3">
+                            <div
+                                class="col-md-5 d-flex flex-column flex-md-row justify-content-md-end align-items-md-center gap-3">
                                 <div class="text-md-end text-muted small">
                                     <div><i class="bi bi-check-circle me-1"></i> Acceptance: --%</div>
                                     <div class="text-white-50"><i class="bi bi-circle me-1"></i> Unsolved</div>
                                 </div>
-                                <a href="#" class="btn btn-outline-primary rounded-pill px-4 fw-medium">Solve</a>
+                                <a th:href="@{/problems/{slug}(slug=${problem.slug})}" class="btn btn-outline-primary rounded-pill px-4 fw-medium">Solve</a>
                             </div>
                         </div>
                     </div>
@@ -103,16 +113,18 @@
             <nav aria-label="Problem pagination" th:if="${problemPage.totalPages > 1}">
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${problemPage.first ? 'disabled' : ''}">
-                        <a class="page-link bg-dark-glass text-white border-secondary border-opacity-50" 
-                           th:href="@{/problems(page=${problemPage.page - 1}, size=${problemPage.size})}" tabindex="-1">Previous</a>
+                        <a class="page-link bg-dark-glass text-white border-secondary border-opacity-50"
+                            th:href="@{/problems(page=${problemPage.page - 1}, size=${problemPage.size})}"
+                            tabindex="-1">Previous</a>
                     </li>
                     <li class="page-item disabled">
-                        <span class="page-link bg-dark-glass text-white border-secondary border-opacity-50" 
-                              th:text="${'Page ' + (problemPage.page + 1) + ' of ' + problemPage.totalPages}">Page 1 of 1</span>
+                        <span class="page-link bg-dark-glass text-white border-secondary border-opacity-50"
+                            th:text="${'Page ' + (problemPage.page + 1) + ' of ' + problemPage.totalPages}">Page 1 of
+                            1</span>
                     </li>
                     <li class="page-item" th:classappend="${problemPage.last ? 'disabled' : ''}">
-                        <a class="page-link bg-dark-glass text-white border-secondary border-opacity-50" 
-                           th:href="@{/problems(page=${problemPage.page + 1}, size=${problemPage.size})}">Next</a>
+                        <a class="page-link bg-dark-glass text-white border-secondary border-opacity-50"
+                            th:href="@{/problems(page=${problemPage.page + 1}, size=${problemPage.size})}">Next</a>
                     </li>
                 </ul>
             </nav>
@@ -120,7 +132,8 @@
         </div>
 
     </div>
-    
+
     <th:block th:fragment="scripts"></th:block>
 </body>
+
 </html>
