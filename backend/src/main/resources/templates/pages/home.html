@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html th:replace="~{layout :: html}">
+<head>
+    <th:block th:fragment="headContent"></th:block>
+</head>
+<body>
+    <div th:fragment="mainContent">
+        
+        <!-- Hero Section -->
+        <div class="container py-4 my-4">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6 text-center text-lg-start">
+                    <h1 class="display-4 fw-bold mb-3">Master Java. <br/><span class="text-primary-custom">One Problem at a Time.</span></h1>
+                    <p class="lead text-muted mb-4">
+                        Elevate your coding skills on a modern, secure platform. Write, compile, and execute Java code directly in your browser with real-time feedback.
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-3 mb-4">
+                        <a th:href="@{/register}" class="btn btn-primary btn-lg px-5 rounded-pill fw-bold shadow-sm">Start Solving</a>
+                        <a href="#" class="btn btn-outline-light btn-lg px-5 rounded-pill shadow-sm">View Problems</a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <!-- Monaco Editor Mockup -->
+                    <div class="card glass border-0 shadow-lg overflow-hidden rounded-3">
+                        <div class="bg-dark px-3 py-2 border-bottom border-secondary border-opacity-25 d-flex align-items-center gap-2">
+                            <div class="rounded-circle bg-danger" style="width: 12px; height: 12px;"></div>
+                            <div class="rounded-circle bg-warning" style="width: 12px; height: 12px;"></div>
+                            <div class="rounded-circle bg-success" style="width: 12px; height: 12px;"></div>
+                            <span class="ms-2 text-muted small font-monospace">Solution.java</span>
+                        </div>
+                        <div class="p-3 font-monospace text-start" style="font-size: 0.9rem; overflow-x: auto; background-color: #1e1e1e; color: #d4d4d4;">
+                            <span style="color: #569cd6;">public class</span> <span style="color: #4ec9b0;">Solution</span> {<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">public static void</span> <span style="color: #dcdcaa;">main</span>(<span style="color: #4ec9b0;">String</span>[] <span style="color: #9cdcfe;">args</span>) {<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #4ec9b0;">System</span>.<span style="color: #4fc1ff;">out</span>.<span style="color: #dcdcaa;">println</span>(<span style="color: #ce9178;">"Hello, Apricorn!"</span>);<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="container py-4 mb-4 border-top border-bottom border-secondary border-opacity-25">
+            <div class="row text-center g-4">
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold text-white mb-1">500+</h3>
+                    <p class="text-muted small text-uppercase mb-0">Problems</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold text-white mb-1">Docker</h3>
+                    <p class="text-muted small text-uppercase mb-0">Sandbox Engine</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold text-white mb-1">JWT</h3>
+                    <p class="text-muted small text-uppercase mb-0">Security</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold text-white mb-1">&lt; 1s</h3>
+                    <p class="text-muted small text-uppercase mb-0">Real-time Judging</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="container py-4 mb-5">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card glass feature-card h-100 p-4 text-center border-0 shadow-sm transition-transform">
+                        <i class="bi bi-shield-lock fs-1 text-primary-custom mb-3"></i>
+                        <h4 class="fw-bold">Secure Execution</h4>
+                        <p class="text-muted mb-0">Your code runs in completely isolated Docker containers with strict resource limits.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card glass feature-card h-100 p-4 text-center border-0 shadow-sm transition-transform">
+                        <i class="bi bi-lightning fs-1 text-warning mb-3"></i>
+                        <h4 class="fw-bold">Real-time Feedback</h4>
+                        <p class="text-muted mb-0">Get instant results on your submissions with detailed test case breakdowns.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card glass feature-card h-100 p-4 text-center border-0 shadow-sm transition-transform">
+                        <i class="bi bi-bar-chart-line fs-1 text-info mb-3"></i>
+                        <h4 class="fw-bold">Rich Analytics</h4>
+                        <p class="text-muted mb-0">Track your progress, monitor acceptance rates, and compete globally.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <th:block th:fragment="scripts"></th:block>
+</body>
+</html>
