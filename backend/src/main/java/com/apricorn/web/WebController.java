@@ -19,7 +19,8 @@ public class WebController {
     private final ProblemService problemService;
     private final TagService tagService;
 
-    public WebController(AnalyticsService analyticsService, UserService userService, ProblemService problemService, TagService tagService) {
+    public WebController(AnalyticsService analyticsService, UserService userService, ProblemService problemService,
+            TagService tagService) {
         this.analyticsService = analyticsService;
         this.userService = userService;
         this.problemService = problemService;
@@ -50,7 +51,8 @@ public class WebController {
     @GetMapping("/profile")
     public String profile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         model.addAttribute("profile", userService.getCurrentUser(userDetails.getUsername()));
-        model.addAttribute("recentSubmissions", analyticsService.getUserDashboard(userDetails.getUsername()).recentSubmissions());
+        model.addAttribute("recentSubmissions",
+                analyticsService.getUserDashboard(userDetails.getUsername()).recentSubmissions());
         return "pages/profile";
     }
 
@@ -59,9 +61,15 @@ public class WebController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Model model) {
-        
+
         model.addAttribute("problemPage", problemService.getProblems(null, null, null, page, size, null));
         model.addAttribute("tags", tagService.getAllTags());
         return "pages/problems";
+    }
+
+    @GetMapping("/problems/{slug}")
+    public String workspace(@org.springframework.web.bind.annotation.PathVariable String slug, Model model) {
+        model.addAttribute("problem", problemService.getProblemBySlug(slug));
+        return "pages/workspace";
     }
 }
