@@ -1,0 +1,74 @@
+:root {
+    --primary: #4CAF50;
+    --primary-hover: #45a049;
+    --bg-dark: #0f172a;
+    --card-bg: #1e293b;
+    --accent: #22c55e;
+}
+
+body {
+    background-color: var(--bg-dark);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.text-primary-custom {
+    color: var(--primary) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+/* Glassmorphism */
+.glass {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.bg-dark-glass {
+    background: rgba(15, 23, 42, 0.85) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Auth Cards */
+.card {
+    border-radius: 1rem;
+}
+
+/* Animations & Transitions */
+.transition-transform {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+}
+
+.problem-card .card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.problem-card .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary) !important;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2) !important;
+}
+
+/* Utility */
+.cursor-pointer {
+    cursor: pointer;
+}

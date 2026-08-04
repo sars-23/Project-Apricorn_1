@@ -40,6 +40,8 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler))
                 .authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/", "/login", "/register", "/problems", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/dashboard", "/profile").authenticated()
                         .requestMatchers("/api/v1/auth/**", "/api/v1/health", "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/leaderboard/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/leaderboard", "/api/v1/problems/*/stats").permitAll()
