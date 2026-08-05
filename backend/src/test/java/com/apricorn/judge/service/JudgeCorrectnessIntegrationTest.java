@@ -30,7 +30,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 @EnabledIfEnvironmentVariable(named = "DOCKER_AVAILABLE", matches = "true", disabledReason = "Requires Docker daemon - set DOCKER_AVAILABLE=true to run")
 public class JudgeCorrectnessIntegrationTest {
 
