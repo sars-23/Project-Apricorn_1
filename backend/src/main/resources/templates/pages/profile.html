@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html th:replace="~{layout :: html}">
+<head>
+    <th:block th:fragment="headContent">
+        <title th:text="${profile.username} + ' - Profile'">Profile</title>
+    </th:block>
+</head>
+<body>
+    <div th:fragment="mainContent">
+        
+        <div class="container py-4 my-4">
+            
+            <div class="row g-4">
+                <!-- Sidebar / Profile Info -->
+                <div class="col-lg-4">
+                    <div class="card glass border-0 p-4 mb-4 text-center">
+                        <div class="d-flex justify-content-center mb-3">
+                            <div class="rounded-circle bg-primary-custom d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                <span class="fs-1 fw-bold text-white" th:text="${#strings.substring(profile.username, 0, 1).toUpperCase()}">U</span>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold text-white mb-1" th:text="${profile.username}">Username</h3>
+                        <p class="text-muted mb-2" th:text="${profile.email}">user@example.com</p>
+                        <div class="mb-3">
+                            <span class="badge bg-secondary-custom me-1" th:text="${profile.role}">USER</span>
+                            <span class="badge bg-dark border text-muted">Joined <span th:text="${#temporals.format(profile.createdAt, 'MMM yyyy')}">Jan 2024</span></span>
+                        </div>
+                    </div>
+
+                    <h4 class="fw-bold mb-3">Actions</h4>
+                    <div class="d-grid gap-2 mb-4">
+                        <a th:href="@{/problems}" class="btn btn-primary text-start rounded-3 py-2 px-3 fw-medium d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-play-circle me-2"></i> Solve Problems</span>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a th:href="@{/submissions}" class="btn btn-outline-light text-start rounded-3 py-2 px-3 fw-medium d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-journal-code me-2"></i> View All Submissions</span>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a th:href="@{/dashboard}" class="btn btn-outline-light text-start rounded-3 py-2 px-3 fw-medium d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-speedometer2 me-2"></i> Dashboard</span>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Main Content / Stats -->
+                <div class="col-lg-8">
+                    <h4 class="fw-bold mb-3">Coding Statistics</h4>
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6 col-md-3">
+                            <div class="card glass border-0 p-3 h-100 text-center">
+                                <h3 class="fw-bold text-white mb-0" th:text="${dashboard.problemsSolved}">0</h3>
+                                <p class="text-muted small text-uppercase mb-0">Problems Solved</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="card glass border-0 p-3 h-100 text-center">
+                                <h3 class="fw-bold text-white mb-0" th:text="${dashboard.totalSubmissions}">0</h3>
+                                <p class="text-muted small text-uppercase mb-0">Submissions</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="card glass border-0 p-3 h-100 text-center">
+                                <h3 class="fw-bold text-white mb-0" th:text="${dashboard.acceptedSubmissions}">0</h3>
+                                <p class="text-muted small text-uppercase mb-0">Accepted</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="card glass border-0 p-3 h-100 text-center">
+                                <h3 class="fw-bold text-white mb-0" th:text="${#numbers.formatDecimal(dashboard.acceptanceRate, 1, 2) + '%'}">0.00%</h3>
+                                <p class="text-muted small text-uppercase mb-0">Acceptance Rate</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card glass border-0 p-4 mb-4">
+                        <h5 class="fw-bold mb-4">Difficulty Breakdown</h5>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-success fw-medium">Easy</span>
+                                <span class="text-muted" th:text="${dashboard.easySolved}">0</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" role="progressbar" th:style="'width: ' + (${dashboard.problemsSolved} > 0 ? (${dashboard.easySolved} * 100.0 / ${dashboard.problemsSolved}) : 0) + '%'" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-warning fw-medium">Medium</span>
+                                <span class="text-muted" th:text="${dashboard.mediumSolved}">0</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-warning" role="progressbar" th:style="'width: ' + (${dashboard.problemsSolved} > 0 ? (${dashboard.mediumSolved} * 100.0 / ${dashboard.problemsSolved}) : 0) + '%'" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-danger fw-medium">Hard</span>
+                                <span class="text-muted" th:text="${dashboard.hardSolved}">0</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-danger" role="progressbar" th:style="'width: ' + (${dashboard.problemsSolved} > 0 ? (${dashboard.hardSolved} * 100.0 / ${dashboard.problemsSolved}) : 0) + '%'" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-end mb-3">
+                        <h4 class="fw-bold mb-0">Recent Submissions</h4>
+                        <a th:href="@{/submissions}" class="text-primary-custom text-decoration-none small">View All</a>
+                    </div>
+                    
+                    <div class="card glass border-0 overflow-hidden">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0 align-middle custom-table">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-4">Problem</th>
+                                        <th>Language</th>
+                                        <th>Verdict</th>
+                                        <th>Runtime</th>
+                                        <th>Memory</th>
+                                        <th>Submitted</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(dashboard.recentSubmissions)}">
+                                        <td colspan="6" class="text-center text-muted py-4">No recent submissions found.</td>
+                                    </tr>
+                                    <tr th:each="sub, iterStat : ${dashboard.recentSubmissions}" th:if="${iterStat.index < 5}">
+                                        <td class="ps-4">
+                                            <a th:href="@{/problems/{slug}(slug=${sub.problemSlug})}" class="text-white text-decoration-none fw-medium problem-link" th:text="${sub.problemTitle}">Problem Title</a>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary text-light border" th:text="${sub.language}">JAVA</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${sub.verdict != null}"
+                                                  th:class="${sub.verdict.name() == 'ACCEPTED' ? 'text-success fw-bold' : (sub.verdict.name() == 'WRONG_ANSWER' ? 'text-danger fw-bold' : 'text-warning fw-bold')}"
+                                                  th:text="${sub.verdict}">ACCEPTED</span>
+                                            <span th:if="${sub.verdict == null}" class="text-muted">PENDING</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${sub.runtimeMs != null}" th:text="${sub.runtimeMs + ' ms'}">0 ms</span>
+                                            <span th:if="${sub.runtimeMs == null}" class="text-muted">N/A</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${sub.memoryKb != null}" th:text="${sub.memoryKb + ' KB'}">0 KB</span>
+                                            <span th:if="${sub.memoryKb == null}" class="text-muted">N/A</span>
+                                        </td>
+                                        <td class="text-muted small" th:text="${#temporals.format(sub.submittedAt, 'MMM dd, HH:mm')}">Oct 26, 14:30</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <th:block th:fragment="scripts"></th:block>
+</body>
+</html>

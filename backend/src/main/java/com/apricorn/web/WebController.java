@@ -98,8 +98,7 @@ public class WebController {
     @GetMapping("/profile")
     public String profile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         model.addAttribute("profile", userService.getCurrentUser(userDetails.getUsername()));
-        model.addAttribute("recentSubmissions",
-                analyticsService.getUserDashboard(userDetails.getUsername()).recentSubmissions());
+        model.addAttribute("dashboard", analyticsService.getUserDashboard(userDetails.getUsername()));
         return "pages/profile";
     }
 
