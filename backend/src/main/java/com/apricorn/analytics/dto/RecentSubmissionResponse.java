@@ -12,5 +12,7 @@ public record RecentSubmissionResponse(
         Language language,
         SubmissionStatus status,
         Verdict verdict,
+        Integer runtimeMs,
+        Integer memoryKb,
         Instant submittedAt
 ) {}

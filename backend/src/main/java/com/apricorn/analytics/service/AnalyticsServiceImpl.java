@@ -71,6 +71,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                         s.getLanguage(),
                         s.getStatus(),
                         s.getVerdict(),
+                        s.getExecutionTimeMs(),
+                        s.getMemoryUsedKb(),
                         s.getSubmittedAt()
                 ))
                 .toList();
