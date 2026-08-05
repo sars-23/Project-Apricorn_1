@@ -4,6 +4,7 @@ import com.apricorn.analytics.service.AnalyticsService;
 import com.apricorn.problem.service.ProblemService;
 import com.apricorn.problem.service.TagService;
 import com.apricorn.user.service.UserService;
+import com.apricorn.submission.service.SubmissionService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -27,14 +28,16 @@ public class WebController {
     private final ProblemService problemService;
     private final TagService tagService;
     private final AuthService authService;
+    private final SubmissionService submissionService;
 
     public WebController(AnalyticsService analyticsService, UserService userService, ProblemService problemService,
-            TagService tagService, AuthService authService) {
+            TagService tagService, AuthService authService, SubmissionService submissionService) {
         this.analyticsService = analyticsService;
         this.userService = userService;
         this.problemService = problemService;
         this.tagService = tagService;
         this.authService = authService;
+        this.submissionService = submissionService;
     }
 
     @GetMapping("/")
@@ -115,5 +118,16 @@ public class WebController {
     public String workspace(@org.springframework.web.bind.annotation.PathVariable String slug, Model model) {
         model.addAttribute("problem", problemService.getProblemBySlug(slug));
         return "pages/workspace";
+    }
+
+    @GetMapping("/submissions")
+    public String submissions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model) {
+        model.addAttribute("submissionPage", submissionService.getUserSubmissions(
+                userDetails.getUsername(), null, null, null, null, page, size, null));
+        return "pages/submission-history";
     }
 }

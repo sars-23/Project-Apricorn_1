@@ -164,13 +164,16 @@ public class JavaDockerExecutor implements LanguageExecutor {
                 }
 
                 if (!outputComparator.isEqual(tc.getExpectedOutput(), execResult.stdout())) {
+                    String formattedError = "Failed Test Case:\n" + tc.getInput() + 
+                                            "\n\nExpected Output:\n" + tc.getExpectedOutput() + 
+                                            "\n\nActual Output:\n" + (execResult.stdout() != null ? execResult.stdout() : "");
                     return new JudgeResult(
                             Verdict.WRONG_ANSWER,
                             (int) maxExecutionTimeMs,
                             0,
                             passedCases,
                             totalCases,
-                            "Output mismatch on test case " + (passedCases + 1)
+                            formattedError
                     );
                 }
 

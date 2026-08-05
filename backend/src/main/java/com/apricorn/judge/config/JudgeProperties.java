@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "judge")
 public class JudgeProperties {
-    private String mode = "stub"; // "docker" or "stub"
+    private String mode = "docker"; // "docker"
     private String javaImage = "eclipse-temurin:21-jdk";
     private String workspaceRoot = System.getProperty("java.io.tmpdir") + "/apricorn-judge";
     private long maxOutputBytes = 1048576L; // 1 MB
