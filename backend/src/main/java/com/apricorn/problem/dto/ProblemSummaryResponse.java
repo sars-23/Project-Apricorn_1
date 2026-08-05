@@ -1,6 +1,7 @@
 package com.apricorn.problem.dto;
 
 import com.apricorn.problem.entity.Difficulty;
+import com.apricorn.problem.entity.ProblemStatus;
 import java.time.Instant;
 import java.util.List;
 
@@ -12,5 +13,7 @@ public record ProblemSummaryResponse(
         List<TagResponse> tags,
         Instant createdAt,
         int timeLimitMs,
-        int memoryLimitMb
+        int memoryLimitMb,
+        Double acceptanceRate,
+        ProblemStatus status
 ) {}

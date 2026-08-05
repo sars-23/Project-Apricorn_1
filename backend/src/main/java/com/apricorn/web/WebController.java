@@ -5,6 +5,8 @@ import com.apricorn.problem.service.ProblemService;
 import com.apricorn.problem.service.TagService;
 import com.apricorn.user.service.UserService;
 import com.apricorn.submission.service.SubmissionService;
+import com.apricorn.problem.entity.Difficulty;
+import com.apricorn.problem.entity.ProblemStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -104,12 +106,48 @@ public class WebController {
 
     @GetMapping("/problems")
     public String problems(
+            @RequestParam(name = "difficulty", required = false) String difficultyStr,
+            @RequestParam(name = "tag", required = false) String tagSlug,
+            @RequestParam(name = "q", required = false) String search,
+            @RequestParam(name = "status", required = false) String statusStr,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String sort,
+            @AuthenticationPrincipal UserDetails userDetails,
             Model model) {
 
-        model.addAttribute("problemPage", problemService.getProblems(null, null, null, page, size, null));
+        Difficulty difficulty = null;
+        if (difficultyStr != null && !difficultyStr.isBlank() && !"ALL".equalsIgnoreCase(difficultyStr)) {
+            try {
+                difficulty = Difficulty.valueOf(difficultyStr.toUpperCase().trim());
+            } catch (Exception ignored) {}
+        }
+
+        ProblemStatus status = null;
+        if (statusStr != null && !statusStr.isBlank() && !"ALL".equalsIgnoreCase(statusStr)) {
+            try {
+                status = ProblemStatus.valueOf(statusStr.toUpperCase().trim());
+            } catch (Exception ignored) {}
+        }
+
+        if ("ALL".equalsIgnoreCase(tagSlug)) {
+            tagSlug = null;
+        }
+
+        String currentUserEmail = userDetails != null ? userDetails.getUsername() : null;
+        var problemPage = problemService.getProblems(difficulty, tagSlug, search, status, currentUserEmail, page, size, sort);
+
+        if (currentUserEmail != null) {
+            model.addAttribute("progressSummary", problemService.getProgressSummary(currentUserEmail));
+        }
+
+        model.addAttribute("problemPage", problemPage);
         model.addAttribute("tags", tagService.getAllTags());
+        model.addAttribute("selectedDifficulty", difficulty != null ? difficulty.name() : "ALL");
+        model.addAttribute("selectedTag", tagSlug != null ? tagSlug : "ALL");
+        model.addAttribute("selectedSearch", search != null ? search : "");
+        model.addAttribute("selectedStatus", status != null ? status.name() : "ALL");
+        model.addAttribute("selectedSort", sort != null ? sort : "newest");
         return "pages/problems";
     }
 

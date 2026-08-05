@@ -32,4 +32,32 @@ public final class ProblemSpecifications {
             return criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), pattern);
         };
     }
+
+    public static Specification<Problem> hasUserStatus(com.apricorn.problem.entity.ProblemStatus status, 
+                                                      java.util.List<Long> solvedProblemIds, 
+                                                      java.util.List<Long> attemptedOnlyProblemIds, 
+                                                      java.util.List<Long> allUserProblemIds) {
+        return (root, query, criteriaBuilder) -> {
+            if (status == null) return null;
+            switch (status) {
+                case SOLVED:
+                    if (solvedProblemIds == null || solvedProblemIds.isEmpty()) {
+                        return criteriaBuilder.disjunction();
+                    }
+                    return root.get("id").in(solvedProblemIds);
+                case ATTEMPTED:
+                    if (attemptedOnlyProblemIds == null || attemptedOnlyProblemIds.isEmpty()) {
+                        return criteriaBuilder.disjunction();
+                    }
+                    return root.get("id").in(attemptedOnlyProblemIds);
+                case UNSOLVED:
+                    if (allUserProblemIds == null || allUserProblemIds.isEmpty()) {
+                        return null;
+                    }
+                    return criteriaBuilder.not(root.get("id").in(allUserProblemIds));
+                default:
+                    return null;
+            }
+        };
+    }
 }

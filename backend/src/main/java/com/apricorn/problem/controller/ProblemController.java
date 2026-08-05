@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.apricorn.problem.entity.ProblemStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+
 @RestController
 @RequestMapping("/api/v1/problems")
 @Tag(name = "Problems", description = "Public problem APIs")
@@ -26,13 +30,38 @@ public class ProblemController {
     @GetMapping
     @Operation(summary = "List problems", description = "Browse, search, filter, and paginate coding problems.")
     public PageResponse<ProblemSummaryResponse> getProblems(
-            @RequestParam(required = false) Difficulty difficulty,
+            @RequestParam(name = "difficulty", required = false) String difficultyStr,
             @RequestParam(name = "tag", required = false) String tagSlug,
-            @RequestParam(required = false) String search,
+            @RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "status", required = false) String statusStr,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String sort) {
-        return problemService.getProblems(difficulty, tagSlug, search, page, size, sort);
+            @RequestParam(required = false) String sort,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String searchQuery = (q != null && !q.isBlank()) ? q : search;
+
+        Difficulty difficulty = null;
+        if (difficultyStr != null && !difficultyStr.isBlank() && !"ALL".equalsIgnoreCase(difficultyStr)) {
+            try {
+                difficulty = Difficulty.valueOf(difficultyStr.toUpperCase().trim());
+            } catch (Exception ignored) {}
+        }
+
+        ProblemStatus status = null;
+        if (statusStr != null && !statusStr.isBlank() && !"ALL".equalsIgnoreCase(statusStr)) {
+            try {
+                status = ProblemStatus.valueOf(statusStr.toUpperCase().trim());
+            } catch (Exception ignored) {}
+        }
+
+        if ("ALL".equalsIgnoreCase(tagSlug)) {
+            tagSlug = null;
+        }
+
+        String currentUserEmail = userDetails != null ? userDetails.getUsername() : null;
+        return problemService.getProblems(difficulty, tagSlug, searchQuery, status, currentUserEmail, page, size, sort);
     }
 
     @GetMapping("/{slug}")

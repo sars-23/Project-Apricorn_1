@@ -39,73 +39,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Problems Filtering & Sorting
+    // Problems Search & Filter Form Debounce / Submission
+    const filterForm = document.getElementById('filterForm');
     const searchInput = document.getElementById('searchProblem');
-    const difficultyFilter = document.getElementById('filterDifficulty');
-    const tagFilter = document.getElementById('filterTag');
-    const sortSelect = document.getElementById('sortProblem');
-    const problemContainer = document.getElementById('problemContainer');
-    const emptyState = document.getElementById('emptyState');
-
-    if (searchInput && difficultyFilter && tagFilter && sortSelect && problemContainer) {
-        
-        const filterProblems = () => {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            const difficulty = difficultyFilter.value;
-            const tag = tagFilter.value;
-            
-            let visibleCount = 0;
-            const cards = Array.from(problemContainer.querySelectorAll('.problem-card'));
-            
-            cards.forEach(card => {
-                const title = card.getAttribute('data-title');
-                const cardDiff = card.getAttribute('data-difficulty');
-                const cardTags = card.getAttribute('data-tags') ? card.getAttribute('data-tags').split(',') : [];
-                
-                const matchesSearch = searchTerm === '' || title.includes(searchTerm);
-                const matchesDiff = difficulty === 'All' || cardDiff === difficulty;
-                const matchesTag = tag === 'All' || cardTags.includes(tag);
-                
-                if (matchesSearch && matchesDiff && matchesTag) {
-                    card.classList.remove('d-none');
-                    visibleCount++;
-                } else {
-                    card.classList.add('d-none');
-                }
-            });
-            
-            if (visibleCount === 0) {
-                emptyState.classList.remove('d-none');
-            } else {
-                emptyState.classList.add('d-none');
+    if (filterForm && searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                filterForm.submit();
             }
-        };
-
-        const sortProblems = () => {
-            const sortVal = sortSelect.value;
-            const cards = Array.from(problemContainer.querySelectorAll('.problem-card'));
-            
-            cards.sort((a, b) => {
-                if (sortVal === 'newest') {
-                    return parseInt(b.getAttribute('data-id')) - parseInt(a.getAttribute('data-id'));
-                } else if (sortVal === 'oldest') {
-                    return parseInt(a.getAttribute('data-id')) - parseInt(b.getAttribute('data-id'));
-                } else if (sortVal === 'title') {
-                    return a.getAttribute('data-title').localeCompare(b.getAttribute('data-title'));
-                } else if (sortVal === 'difficulty') {
-                    const diffRank = { 'EASY': 1, 'MEDIUM': 2, 'HARD': 3 };
-                    return diffRank[a.getAttribute('data-difficulty')] - diffRank[b.getAttribute('data-difficulty')];
-                }
-                return 0;
-            });
-            
-            cards.forEach(card => problemContainer.appendChild(card));
-        };
-
-        searchInput.addEventListener('input', filterProblems);
-        difficultyFilter.addEventListener('change', filterProblems);
-        tagFilter.addEventListener('change', filterProblems);
-        sortSelect.addEventListener('change', sortProblems);
+        });
     }
 });
 

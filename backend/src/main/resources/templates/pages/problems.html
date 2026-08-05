@@ -19,59 +19,100 @@
                 </div>
             </div>
 
-            <!-- Filters Section -->
-            <div class="card glass border-0 p-3 mb-4">
-                <div class="row g-3 align-items-center">
-                    <div class="col-12 col-md-4">
-                        <div class="input-group">
-                            <span
-                                class="input-group-text bg-dark-glass border-secondary border-opacity-50 text-muted"><i
-                                    class="bi bi-search"></i></span>
-                            <input type="text" id="searchProblem"
-                                class="form-control bg-dark-glass border-secondary border-opacity-50 text-white"
-                                placeholder="Search problems by title...">
-                        </div>
+            <!-- Personalized Progress Banner for Authenticated Users -->
+            <div th:if="${progressSummary != null}" class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="card glass border-0 p-3 text-center">
+                        <h4 class="fw-bold text-white mb-0" th:text="${progressSummary.solvedTotal + ' / ' + progressSummary.totalProblems}">0 / 0</h4>
+                        <span class="text-muted small text-uppercase">Total Solved</span>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <select id="filterDifficulty"
-                            class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
-                            <option value="All">Difficulty: All</option>
-                            <option value="EASY">Easy</option>
-                            <option value="MEDIUM">Medium</option>
-                            <option value="HARD">Hard</option>
-                        </select>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card glass border-0 p-3 text-center">
+                        <h4 class="fw-bold text-success mb-0" th:text="${progressSummary.solvedEasy + ' / ' + progressSummary.totalEasy}">0 / 0</h4>
+                        <span class="text-muted small text-uppercase">Easy</span>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <select id="filterTag"
-                            class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
-                            <option value="All">Tags: All</option>
-                            <option th:each="tag : ${tags}" th:value="${tag.slug}" th:text="${tag.name}">Tag</option>
-                        </select>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card glass border-0 p-3 text-center">
+                        <h4 class="fw-bold text-warning mb-0" th:text="${progressSummary.solvedMedium + ' / ' + progressSummary.totalMedium}">0 / 0</h4>
+                        <span class="text-muted small text-uppercase">Medium</span>
                     </div>
-                    <div class="col-12 col-md-2">
-                        <select id="sortProblem"
-                            class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
-                            <option value="newest">Sort: Newest</option>
-                            <option value="oldest">Sort: Oldest</option>
-                            <option value="title">Sort: Title</option>
-                            <option value="difficulty">Sort: Difficulty</option>
-                        </select>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card glass border-0 p-3 text-center">
+                        <h4 class="fw-bold text-danger mb-0" th:text="${progressSummary.solvedHard + ' / ' + progressSummary.totalHard}">0 / 0</h4>
+                        <span class="text-muted small text-uppercase">Hard</span>
                     </div>
                 </div>
             </div>
 
+            <!-- Filters Form -->
+            <form id="filterForm" method="GET" th:action="@{/problems}" class="card glass border-0 p-3 mb-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-12 col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark-glass border-secondary border-opacity-50 text-muted">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" name="q" id="searchProblem"
+                                class="form-control bg-dark-glass border-secondary border-opacity-50 text-white"
+                                placeholder="Search by title..." th:value="${selectedSearch}">
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <select name="difficulty" id="filterDifficulty" onchange="this.form.submit()"
+                            class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
+                            <option value="ALL" th:selected="${selectedDifficulty == 'ALL'}">Difficulty: All</option>
+                            <option value="EASY" th:selected="${selectedDifficulty == 'EASY'}">Easy</option>
+                            <option value="MEDIUM" th:selected="${selectedDifficulty == 'MEDIUM'}">Medium</option>
+                            <option value="HARD" th:selected="${selectedDifficulty == 'HARD'}">Hard</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <select name="tag" id="filterTag" onchange="this.form.submit()"
+                            class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
+                            <option value="ALL" th:selected="${selectedTag == 'ALL'}">Tags: All</option>
+                            <option th:each="tag : ${tags}" th:value="${tag.slug}" th:text="${tag.name}"
+                                th:selected="${selectedTag == tag.slug}">Tag</option>
+                        </select>
+                    </div>
+                    <div th:if="${progressSummary != null}" class="col-6 col-md-2">
+                        <select name="status" id="filterStatus" onchange="this.form.submit()"
+                            class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
+                            <option value="ALL" th:selected="${selectedStatus == 'ALL'}">Status: All</option>
+                            <option value="SOLVED" th:selected="${selectedStatus == 'SOLVED'}">Solved</option>
+                            <option value="ATTEMPTED" th:selected="${selectedStatus == 'ATTEMPTED'}">Attempted</option>
+                            <option value="UNSOLVED" th:selected="${selectedStatus == 'UNSOLVED'}">Unsolved</option>
+                        </select>
+                    </div>
+                    <div class="col-6" th:classappend="${progressSummary != null ? 'col-md-2' : 'col-md-3'}">
+                        <select name="sort" id="sortProblem" onchange="this.form.submit()"
+                            class="form-select bg-dark-glass border-secondary border-opacity-50 text-white cursor-pointer">
+                            <option value="newest" th:selected="${selectedSort == 'newest'}">Sort: Newest</option>
+                            <option value="oldest" th:selected="${selectedSort == 'oldest'}">Sort: Oldest</option>
+                            <option value="title" th:selected="${selectedSort == 'title'}">Sort: Title</option>
+                            <option value="difficulty" th:selected="${selectedSort == 'difficulty'}">Sort: Difficulty</option>
+                            <option value="acceptance" th:selected="${selectedSort == 'acceptance'}">Sort: Acceptance</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-1 text-md-end">
+                        <a th:href="@{/problems}" class="btn btn-outline-secondary btn-sm w-100 py-2">Clear</a>
+                    </div>
+                </div>
+            </form>
+
             <!-- Empty State -->
-            <div id="emptyState" class="text-center py-5 d-none">
+            <div id="emptyState" class="text-center py-5" th:if="${#lists.isEmpty(problemPage.content)}">
                 <i class="bi bi-search fs-1 text-muted mb-3 d-block"></i>
-                <h4 class="fw-bold text-white">No problems found</h4>
-                <p class="text-muted">Try adjusting your filters or search term.</p>
+                <h4 class="fw-bold text-white">No problems match these filters.</h4>
+                <p class="text-muted mb-3">Try clearing or adjusting your search filters.</p>
+                <a th:href="@{/problems}" class="btn btn-outline-primary rounded-pill px-4">Clear Filters</a>
             </div>
 
             <!-- Problem List -->
-            <div id="problemContainer" class="row g-3 mb-4">
-                <div th:each="problem : ${problemPage.content}" class="col-12 problem-card" th:data-id="${problem.id}"
-                    th:data-title="${#strings.toLowerCase(problem.title)}" th:data-difficulty="${problem.difficulty}"
-                    th:data-tags="${#strings.listJoin(problem.tags.![slug], ',')}">
+            <div id="problemContainer" class="row g-3 mb-4" th:if="${!#lists.isEmpty(problemPage.content)}">
+                <div th:each="problem : ${problemPage.content}" class="col-12 problem-card">
 
                     <div class="card glass border-0 border-start border-4 shadow-sm p-3 transition-transform"
                         th:classappend="${problem.difficulty.name() == 'EASY' ? 'border-success' : (problem.difficulty.name() == 'MEDIUM' ? 'border-warning' : 'border-danger')}">
@@ -95,11 +136,21 @@
                                     </div>
                                 </div>
                             </div>
-                            <div
-                                class="col-md-5 d-flex flex-column flex-md-row justify-content-md-end align-items-md-center gap-3">
+                            <div class="col-md-5 d-flex flex-column flex-md-row justify-content-md-end align-items-md-center gap-3">
                                 <div class="text-md-end text-muted small">
-                                    <div><i class="bi bi-check-circle me-1"></i> Acceptance: N/A</div>
-                                    <div class="text-white-50"><i class="bi bi-circle me-1"></i> Unsolved</div>
+                                    <div>
+                                        <i class="bi bi-percent me-1"></i> Acceptance: 
+                                        <span th:text="${problem.acceptanceRate != null ? #numbers.formatDecimal(problem.acceptanceRate, 1, 1) + '%' : '—'}">—</span>
+                                    </div>
+                                    <div th:if="${problem.status.name() == 'SOLVED'}" class="text-success fw-bold">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Solved
+                                    </div>
+                                    <div th:if="${problem.status.name() == 'ATTEMPTED'}" class="text-warning fw-bold">
+                                        <i class="bi bi-exclamation-circle-fill me-1"></i> Attempted
+                                    </div>
+                                    <div th:if="${problem.status.name() == 'UNSOLVED'}" class="text-white-50">
+                                        <i class="bi bi-circle me-1"></i> Unsolved
+                                    </div>
                                 </div>
                                 <a th:href="@{/problems/{slug}(slug=${problem.slug})}" class="btn btn-outline-primary rounded-pill px-4 fw-medium stretched-link">Solve</a>
                             </div>
@@ -114,17 +165,16 @@
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${problemPage.first ? 'disabled' : ''}">
                         <a class="page-link bg-dark-glass text-white border-secondary border-opacity-50"
-                            th:href="@{/problems(page=${problemPage.page - 1}, size=${problemPage.size})}"
+                            th:href="@{/problems(q=${selectedSearch}, difficulty=${selectedDifficulty == 'ALL' ? null : selectedDifficulty}, tag=${selectedTag == 'ALL' ? null : selectedTag}, status=${selectedStatus == 'ALL' ? null : selectedStatus}, sort=${selectedSort}, page=${problemPage.page - 1})}"
                             tabindex="-1">Previous</a>
                     </li>
                     <li class="page-item disabled">
                         <span class="page-link bg-dark-glass text-white border-secondary border-opacity-50"
-                            th:text="${'Page ' + (problemPage.page + 1) + ' of ' + problemPage.totalPages}">Page 1 of
-                            1</span>
+                            th:text="${'Page ' + (problemPage.page + 1) + ' of ' + problemPage.totalPages}">Page 1 of 1</span>
                     </li>
                     <li class="page-item" th:classappend="${problemPage.last ? 'disabled' : ''}">
                         <a class="page-link bg-dark-glass text-white border-secondary border-opacity-50"
-                            th:href="@{/problems(page=${problemPage.page + 1}, size=${problemPage.size})}">Next</a>
+                            th:href="@{/problems(q=${selectedSearch}, difficulty=${selectedDifficulty == 'ALL' ? null : selectedDifficulty}, tag=${selectedTag == 'ALL' ? null : selectedTag}, status=${selectedStatus == 'ALL' ? null : selectedStatus}, sort=${selectedSort}, page=${problemPage.page + 1})}">Next</a>
                     </li>
                 </ul>
             </nav>

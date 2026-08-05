@@ -17,6 +17,10 @@ public class ProblemMapper {
     }
 
     public ProblemSummaryResponse toSummaryResponse(Problem problem) {
+        return toSummaryResponse(problem, null, com.apricorn.problem.entity.ProblemStatus.UNSOLVED);
+    }
+
+    public ProblemSummaryResponse toSummaryResponse(Problem problem, Double acceptanceRate, com.apricorn.problem.entity.ProblemStatus status) {
         if (problem == null) return null;
         List<TagResponse> tags = problem.getTags() != null
                 ? problem.getTags().stream()
@@ -33,7 +37,9 @@ public class ProblemMapper {
                 tags,
                 problem.getCreatedAt(),
                 problem.getTimeLimitMs(),
-                problem.getMemoryLimitMb()
+                problem.getMemoryLimitMb(),
+                acceptanceRate,
+                status != null ? status : com.apricorn.problem.entity.ProblemStatus.UNSOLVED
         );
     }
 

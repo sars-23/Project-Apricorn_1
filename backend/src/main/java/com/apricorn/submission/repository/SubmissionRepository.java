@@ -65,4 +65,19 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long>, J
     long countByVerdict(Verdict verdict);
 
     long countByLanguage(com.apricorn.submission.entity.Language language);
+
+    @Query("SELECT s.problem.id, COUNT(CASE WHEN s.verdict = com.apricorn.submission.entity.Verdict.ACCEPTED THEN 1 END), COUNT(s.id) " +
+           "FROM Submission s WHERE s.problem.id IN :problemIds AND s.status = com.apricorn.submission.entity.SubmissionStatus.COMPLETED " +
+           "GROUP BY s.problem.id")
+    List<Object[]> findAcceptanceStatsForProblemIds(@Param("problemIds") List<Long> problemIds);
+
+    @Query("SELECT s.problem.id, s.verdict FROM Submission s " +
+           "WHERE s.user.id = :userId AND s.problem.id IN :problemIds AND s.status = com.apricorn.submission.entity.SubmissionStatus.COMPLETED")
+    List<Object[]> findUserVerdictsForProblemIds(@Param("userId") Long userId, @Param("problemIds") List<Long> problemIds);
+
+    @Query("SELECT DISTINCT s.problem.id FROM Submission s WHERE s.user.id = :userId AND s.verdict = :verdict AND s.status = com.apricorn.submission.entity.SubmissionStatus.COMPLETED")
+    List<Long> findDistinctProblemIdsByUserIdAndVerdict(@Param("userId") Long userId, @Param("verdict") Verdict verdict);
+
+    @Query("SELECT DISTINCT s.problem.id FROM Submission s WHERE s.user.id = :userId AND s.status = com.apricorn.submission.entity.SubmissionStatus.COMPLETED")
+    List<Long> findDistinctProblemIdsByUserId(@Param("userId") Long userId);
 }

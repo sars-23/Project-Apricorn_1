@@ -24,10 +24,13 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.apricorn.submission.repository.SubmissionRepository;
+
 class ProblemServiceTest {
     private ProblemRepository problemRepository;
     private TagRepository tagRepository;
     private UserRepository userRepository;
+    private SubmissionRepository submissionRepository;
     private ProblemService problemService;
 
     @BeforeEach
@@ -35,10 +38,12 @@ class ProblemServiceTest {
         problemRepository = mock(ProblemRepository.class);
         tagRepository = mock(TagRepository.class);
         userRepository = mock(UserRepository.class);
+        submissionRepository = mock(SubmissionRepository.class);
         problemService = new ProblemServiceImpl(
                 problemRepository,
                 tagRepository,
                 userRepository,
+                submissionRepository,
                 new ProblemMapper(new TagMapper())
         );
     }
