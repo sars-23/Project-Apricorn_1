@@ -1,6 +1,7 @@
 let editor;
 let currentSubmissionId = null;
 let pollInterval = null;
+let lastSubmittedCode = null;
 
 require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
 
@@ -43,9 +44,14 @@ require(['vs/editor/editor.main'], function() {
         }
     });
 
-    // Auto-save draft to local storage
+    // Auto-save draft to local storage and handle stale result panel
     editor.onDidChangeModelContent(() => {
-        localStorage.setItem(draftKey, editor.getValue());
+        const currentCode = editor.getValue();
+        localStorage.setItem(draftKey, currentCode);
+        
+        if (lastSubmittedCode !== null && currentCode !== lastSubmittedCode) {
+            hideResult();
+        }
     });
 });
 
@@ -89,6 +95,8 @@ async function submitCode() {
         alert('Please write some code before submitting.');
         return;
     }
+    
+    lastSubmittedCode = sourceCode;
 
     // Update UI
     const submitBtn = document.getElementById('submitBtn');
@@ -175,11 +183,24 @@ function startPolling() {
                     updateResultUI('INTERNAL ERROR', 'The judge encountered an internal error processing your submission.', 'text-danger');
                     resetSubmitBtn();
                 } else {
-                    const statusText = data.status === 'RUNNING' ? 'Running' : 'Pending';
-                    updateResultUI(statusText, 'Executing test cases...', 'text-info');
+                    let statusText = 'Pending...';
+                    let detailText = 'Waiting in queue...';
+                    let btnText = ' Pending...';
+                    
+                    if (data.status === 'RUNNING') {
+                        statusText = 'Running Tests...';
+                        detailText = 'Executing test cases against your code...';
+                        btnText = ' Running...';
+                    } else if (data.status === 'QUEUED' || data.status === 'PENDING') {
+                        statusText = 'Compiling...';
+                        detailText = 'Building your code...';
+                        btnText = ' Compiling...';
+                    }
+                    
+                    updateResultUI(statusText, detailText, 'text-info');
                     
                     const submitBtnText = document.getElementById('submitBtnText');
-                    if (submitBtnText) submitBtnText.textContent = ' Running...';
+                    if (submitBtnText) submitBtnText.textContent = btnText;
                 }
             } else {
                 clearInterval(pollInterval);
@@ -244,14 +265,40 @@ function renderFinalVerdict(data) {
         detailsHtml += `
         <div class="mt-3">
             <div class="text-secondary small mb-1">Compilation Error</div>
-            <pre class="bg-black p-3 text-warning border border-secondary rounded font-monospace" style="white-space: pre-wrap; font-size: 0.85rem;">${data.errorMessage}</pre>
+            <pre class="bg-black p-3 text-warning border border-secondary rounded font-monospace" style="white-space: pre-wrap; font-size: 0.85rem; max-height: 200px; overflow-y: auto;">${data.errorMessage}</pre>
         </div>`;
     } else if (data.errorMessage && verdict !== 'INTERNAL_ERROR') {
-        detailsHtml += `
-        <div class="mt-3">
-            <div class="text-secondary small mb-1">Error Details</div>
-            <pre class="bg-black p-3 text-danger border border-secondary rounded font-monospace" style="white-space: pre-wrap; font-size: 0.85rem;">${data.errorMessage}</pre>
-        </div>`;
+        if (data.errorMessage.includes('Failed Test Case:')) {
+            // It's our formatted WRONG_ANSWER message from JavaDockerExecutor
+            const parts = data.errorMessage.split('\\n\\n');
+            let testCaseHtml = '';
+            
+            parts.forEach(part => {
+                if (part.startsWith('Failed Test Case:\\n')) {
+                    testCaseHtml += `<div class="mt-3"><div class="text-secondary small mb-1">Failed Test Case (Input)</div><pre class="bg-black p-2 text-light border border-secondary rounded font-monospace" style="white-space: pre-wrap; font-size: 0.85rem;">${part.replace('Failed Test Case:\\n', '')}</pre></div>`;
+                } else if (part.startsWith('Expected Output:\\n')) {
+                    testCaseHtml += `<div class="mt-2"><div class="text-secondary small mb-1">Expected Output</div><pre class="bg-black p-2 text-success border border-secondary rounded font-monospace" style="white-space: pre-wrap; font-size: 0.85rem;">${part.replace('Expected Output:\\n', '')}</pre></div>`;
+                } else if (part.startsWith('Actual Output:\\n')) {
+                    testCaseHtml += `<div class="mt-2"><div class="text-secondary small mb-1">Actual Output</div><pre class="bg-black p-2 text-danger border border-secondary rounded font-monospace" style="white-space: pre-wrap; font-size: 0.85rem;">${part.replace('Actual Output:\\n', '')}</pre></div>`;
+                }
+            });
+            
+            if (testCaseHtml !== '') {
+                detailsHtml += testCaseHtml;
+            } else {
+                detailsHtml += `
+                <div class="mt-3">
+                    <div class="text-secondary small mb-1">Error Details</div>
+                    <pre class="bg-black p-3 text-danger border border-secondary rounded font-monospace" style="white-space: pre-wrap; font-size: 0.85rem;">${data.errorMessage}</pre>
+                </div>`;
+            }
+        } else {
+            detailsHtml += `
+            <div class="mt-3">
+                <div class="text-secondary small mb-1">Error Details</div>
+                <pre class="bg-black p-3 text-danger border border-secondary rounded font-monospace" style="white-space: pre-wrap; font-size: 0.85rem;">${data.errorMessage}</pre>
+            </div>`;
+        }
     }
 
     updateResultUI(`${iconHtml} ${verdictText}`, detailsHtml, colorClass);

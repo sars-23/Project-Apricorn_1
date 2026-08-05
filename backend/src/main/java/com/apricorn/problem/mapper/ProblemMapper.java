@@ -31,7 +31,9 @@ public class ProblemMapper {
                 problem.getSlug(),
                 problem.getDifficulty(),
                 tags,
-                problem.getCreatedAt()
+                problem.getCreatedAt(),
+                problem.getTimeLimitMs(),
+                problem.getMemoryLimitMb()
         );
     }
 

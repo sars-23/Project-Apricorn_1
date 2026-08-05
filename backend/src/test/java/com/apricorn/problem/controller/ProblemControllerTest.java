@@ -62,7 +62,7 @@ class ProblemControllerTest {
 
     @Test
     void allowsUnauthenticatedAccessToGetProblems() throws Exception {
-        ProblemSummaryResponse summary = new ProblemSummaryResponse(1L, "Two Sum", "two-sum", Difficulty.EASY, List.of(), Instant.now());
+        ProblemSummaryResponse summary = new ProblemSummaryResponse(1L, "Two Sum", "two-sum", Difficulty.EASY, List.of(), Instant.now(), 2000, 256);
         PageResponse<ProblemSummaryResponse> page = new PageResponse<>(List.of(summary), 0, 20, 1, 1, true, true);
 
         when(problemService.getProblems(eq(Difficulty.EASY), eq("array"), eq("two"), eq(0), eq(20), eq("title,asc")))

@@ -90,18 +90,18 @@
                                             th:text="${problem.difficulty.name()}">EASY</span>
                                         <span class="badge bg-secondary border border-secondary"
                                             th:each="tag : ${problem.tags}" th:text="${tag.name}">Tag</span>
-                                        <span class="text-muted small"><i class="bi bi-clock me-1"></i> 1000ms</span>
-                                        <span class="text-muted small"><i class="bi bi-memory me-1"></i> 256MB</span>
+                                        <span class="text-muted small"><i class="bi bi-clock me-1"></i> <span th:text="${problem.timeLimitMs}">1000</span>ms</span>
+                                        <span class="text-muted small"><i class="bi bi-memory me-1"></i> <span th:text="${problem.memoryLimitMb}">256</span>MB</span>
                                     </div>
                                 </div>
                             </div>
                             <div
                                 class="col-md-5 d-flex flex-column flex-md-row justify-content-md-end align-items-md-center gap-3">
                                 <div class="text-md-end text-muted small">
-                                    <div><i class="bi bi-check-circle me-1"></i> Acceptance: --%</div>
+                                    <div><i class="bi bi-check-circle me-1"></i> Acceptance: N/A</div>
                                     <div class="text-white-50"><i class="bi bi-circle me-1"></i> Unsolved</div>
                                 </div>
-                                <a th:href="@{/problems/{slug}(slug=${problem.slug})}" class="btn btn-outline-primary rounded-pill px-4 fw-medium">Solve</a>
+                                <a th:href="@{/problems/{slug}(slug=${problem.slug})}" class="btn btn-outline-primary rounded-pill px-4 fw-medium stretched-link">Solve</a>
                             </div>
                         </div>
                     </div>

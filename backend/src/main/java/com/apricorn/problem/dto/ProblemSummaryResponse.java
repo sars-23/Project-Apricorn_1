@@ -10,5 +10,7 @@ public record ProblemSummaryResponse(
         String slug,
         Difficulty difficulty,
         List<TagResponse> tags,
-        Instant createdAt
+        Instant createdAt,
+        int timeLimitMs,
+        int memoryLimitMb
 ) {}

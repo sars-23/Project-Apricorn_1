@@ -24,7 +24,7 @@ jwt:
   expiration-ms: ${JWT_EXPIRATION:3600000}
 
 judge:
-  mode: ${JUDGE_MODE:stub}
+  mode: ${JUDGE_MODE:docker}
   java-image: eclipse-temurin:21-jdk
   max-output-bytes: 1048576
   compile-timeout-ms: 10000

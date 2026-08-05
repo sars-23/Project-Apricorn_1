@@ -19,7 +19,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(name = "judge.mode", havingValue = "docker")
+@ConditionalOnProperty(name = "judge.mode", havingValue = "docker", matchIfMissing = true)
 public class DockerJudgeService implements JudgeService {
     private static final Logger log = LoggerFactory.getLogger(DockerJudgeService.class);
 
