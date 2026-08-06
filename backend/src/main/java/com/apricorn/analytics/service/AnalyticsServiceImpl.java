@@ -1,26 +1,25 @@
 package com.apricorn.analytics.service;
 
-import com.apricorn.analytics.dto.PlatformAnalyticsResponse;
-import com.apricorn.analytics.dto.ProblemStatsResponse;
-import com.apricorn.analytics.dto.RecentSubmissionResponse;
-import com.apricorn.analytics.dto.UserDashboardResponse;
+import com.apricorn.analytics.dto.*;
 import com.apricorn.exception.ProblemNotFoundException;
 import com.apricorn.problem.entity.Difficulty;
 import com.apricorn.problem.entity.Problem;
 import com.apricorn.problem.repository.ProblemRepository;
 import com.apricorn.submission.entity.Language;
 import com.apricorn.submission.entity.Submission;
+import com.apricorn.submission.entity.SubmissionStatus;
 import com.apricorn.submission.entity.Verdict;
 import com.apricorn.submission.repository.SubmissionRepository;
 import com.apricorn.user.entity.User;
 import com.apricorn.user.repository.UserRepository;
+
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,19 +48,116 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 .orElseThrow(() -> new NoSuchElementException("User not found: " + userEmail));
 
         Long userId = user.getId();
+
+        // 1. Summary Counts
         long totalSubmissions = submissionRepository.countByUserId(userId);
-        long acceptedSubmissions = submissionRepository.countByUserIdAndVerdict(userId, Verdict.ACCEPTED);
-        double acceptanceRate = totalSubmissions > 0 ? Math.round(((double) acceptedSubmissions / totalSubmissions * 100.0) * 10.0) / 10.0 : 0.0;
-        long problemsAttempted = submissionRepository.countDistinctAttemptedProblemsByUserId(userId);
+        long judgedSubmissions = submissionRepository.countByUserIdAndStatus(userId, SubmissionStatus.COMPLETED);
+        long acceptedSubmissions = submissionRepository.countByUserIdAndStatusAndVerdict(userId, SubmissionStatus.COMPLETED, Verdict.ACCEPTED);
+        Double acceptanceRate = judgedSubmissions > 0 ? Math.round(((double) acceptedSubmissions / judgedSubmissions * 100.0) * 10.0) / 10.0 : null;
         long problemsSolved = submissionRepository.countDistinctSolvedProblemsByUserId(userId);
+        long totalCatalogProblems = problemRepository.count();
+        long problemsAttempted = submissionRepository.countDistinctAttemptedProblemsByUserId(userId);
 
+        DashboardSummaryResponse summary = new DashboardSummaryResponse(
+                problemsSolved,
+                totalCatalogProblems,
+                totalSubmissions,
+                judgedSubmissions,
+                acceptedSubmissions,
+                acceptanceRate
+        );
+
+        // 2. Difficulty Progress
         long easySolved = submissionRepository.countDistinctSolvedProblemsByUserIdAndDifficulty(userId, Difficulty.EASY);
+        long totalEasy = problemRepository.countByDifficulty(Difficulty.EASY);
         long mediumSolved = submissionRepository.countDistinctSolvedProblemsByUserIdAndDifficulty(userId, Difficulty.MEDIUM);
+        long totalMedium = problemRepository.countByDifficulty(Difficulty.MEDIUM);
         long hardSolved = submissionRepository.countDistinctSolvedProblemsByUserIdAndDifficulty(userId, Difficulty.HARD);
+        long totalHard = problemRepository.countByDifficulty(Difficulty.HARD);
 
-        List<Instant> timestamps = submissionRepository.findSubmissionTimestampsByUserId(userId);
-        StreakCalculator.StreakResult streak = streakCalculator.calculateStreak(timestamps);
+        DifficultyProgressResponse difficultyProgress = new DifficultyProgressResponse(
+                easySolved, totalEasy,
+                mediumSolved, totalMedium,
+                hardSolved, totalHard
+        );
 
+        // 3. Verdict Distribution (Judged Submissions Only)
+        List<Object[]> verdictCountsRaw = submissionRepository.findVerdictCountsByUserId(userId);
+        Map<Verdict, Long> verdictCountMap = new EnumMap<>(Verdict.class);
+        for (Object[] row : verdictCountsRaw) {
+            if (row[0] != null && row[1] != null) {
+                verdictCountMap.put((Verdict) row[0], ((Number) row[1]).longValue());
+            }
+        }
+
+        List<VerdictStatResponse> verdictDistribution = new ArrayList<>();
+        for (Verdict v : Verdict.values()) {
+            long count = verdictCountMap.getOrDefault(v, 0L);
+            if (count > 0) {
+                double pct = judgedSubmissions > 0 ? Math.round(((double) count / judgedSubmissions * 100.0) * 10.0) / 10.0 : 0.0;
+                verdictDistribution.add(new VerdictStatResponse(v, formatEnumName(v.name()), count, pct));
+            }
+        }
+
+        // 4. Continuous 14-Day Activity
+        ZoneId zone = ZoneId.systemDefault();
+        LocalDate today = LocalDate.now(zone);
+        LocalDate startDate = today.minusDays(13);
+        Instant startInstant = startDate.atStartOfDay(zone).toInstant();
+
+        List<Object[]> activityRows = submissionRepository.findSubmissionsByUserIdSince(userId, startInstant);
+        Map<LocalDate, long[]> dailyMap = new HashMap<>();
+        for (Object[] row : activityRows) {
+            Instant submittedAt = (Instant) row[0];
+            Verdict verdict = (Verdict) row[1];
+            if (submittedAt != null) {
+                LocalDate dateKey = submittedAt.atZone(zone).toLocalDate();
+                long[] counts = dailyMap.computeIfAbsent(dateKey, k -> new long[2]);
+                counts[0]++; // total count
+                if (verdict == Verdict.ACCEPTED) {
+                    counts[1]++; // accepted count
+                }
+            }
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+        List<DailyActivityResponse> activity = new ArrayList<>();
+        for (LocalDate d = startDate; !d.isAfter(today); d = d.plusDays(1)) {
+            long[] counts = dailyMap.getOrDefault(d, new long[2]);
+            activity.add(new DailyActivityResponse(d, d.format(formatter), counts[0], counts[1]));
+        }
+
+        // 5. Language Distribution
+        List<Object[]> langCountsRaw = submissionRepository.findLanguageCountsByUserId(userId);
+        Map<Language, Long> langCountMap = new EnumMap<>(Language.class);
+        for (Object[] row : langCountsRaw) {
+            if (row[0] != null && row[1] != null) {
+                langCountMap.put((Language) row[0], ((Number) row[1]).longValue());
+            }
+        }
+
+        List<LanguageStatResponse> languageDistribution = new ArrayList<>();
+        for (Language l : Language.values()) {
+            long count = langCountMap.getOrDefault(l, 0L);
+            if (count > 0) {
+                double pct = totalSubmissions > 0 ? Math.round(((double) count / totalSubmissions * 100.0) * 10.0) / 10.0 : 0.0;
+                languageDistribution.add(new LanguageStatResponse(l, formatEnumName(l.name()), count, pct));
+            }
+        }
+
+        // 6. Continue Solving (Top 3 attempted-unsolved problems)
+        List<Object[]> continueRaw = submissionRepository.findRecentAttemptedUnsolvedProblemsByUserId(userId, PageRequest.of(0, 3));
+        List<ContinueSolvingResponse> continueSolving = continueRaw.stream()
+                .map(row -> new ContinueSolvingResponse(
+                        (Long) row[0],
+                        (String) row[1],
+                        (String) row[2],
+                        (Difficulty) row[3],
+                        (Instant) row[4]
+                ))
+                .toList();
+
+        // 7. Recent Submissions
         List<Submission> recentSubmissionsList = submissionRepository.findTop10ByUserIdOrderBySubmittedAtDesc(userId);
         List<RecentSubmissionResponse> recentSubmissions = recentSubmissionsList.stream()
                 .map(s -> new RecentSubmissionResponse(
@@ -77,20 +173,45 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 ))
                 .toList();
 
+        // 8. Streak
+        List<Instant> timestamps = submissionRepository.findSubmissionTimestampsByUserId(userId);
+        StreakCalculator.StreakResult streak = streakCalculator.calculateStreak(timestamps);
+
+        double legacyAcceptanceRate = acceptanceRate != null ? acceptanceRate : 0.0;
+
         return new UserDashboardResponse(
                 user.getUsername(),
+                summary,
+                difficultyProgress,
+                verdictDistribution,
+                activity,
+                languageDistribution,
+                recentSubmissions,
+                continueSolving,
                 totalSubmissions,
                 acceptedSubmissions,
-                acceptanceRate,
+                legacyAcceptanceRate,
                 problemsAttempted,
                 problemsSolved,
                 easySolved,
                 mediumSolved,
                 hardSolved,
                 streak.currentStreak(),
-                streak.longestStreak(),
-                recentSubmissions
+                streak.longestStreak()
         );
+    }
+
+    private String formatEnumName(String name) {
+        if (name == null || name.isEmpty()) return "";
+        String[] parts = name.split("_");
+        StringBuilder sb = new StringBuilder();
+        for (String p : parts) {
+            if (!p.isEmpty()) {
+                if (!sb.isEmpty()) sb.append(" ");
+                sb.append(p.substring(0, 1).toUpperCase()).append(p.substring(1).toLowerCase());
+            }
+        }
+        return sb.toString();
     }
 
     @Override

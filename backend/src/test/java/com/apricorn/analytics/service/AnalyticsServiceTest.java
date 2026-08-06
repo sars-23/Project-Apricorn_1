@@ -48,15 +48,18 @@ class AnalyticsServiceTest {
 
         when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.of(user));
         when(submissionRepository.countByUserId(1L)).thenReturn(0L);
-        when(submissionRepository.countByUserIdAndVerdict(1L, Verdict.ACCEPTED)).thenReturn(0L);
 
         UserDashboardResponse dashboard = analyticsService.getUserDashboard("new@example.com");
 
         assertThat(dashboard.username()).isEqualTo("new_user");
-        assertThat(dashboard.totalSubmissions()).isEqualTo(0L);
-        assertThat(dashboard.acceptanceRate()).isEqualTo(0.0);
-        assertThat(dashboard.problemsSolved()).isEqualTo(0L);
-        assertThat(dashboard.currentStreak()).isEqualTo(0);
+        assertThat(dashboard.summary().totalSubmissions()).isEqualTo(0L);
+        assertThat(dashboard.summary().judgedSubmissions()).isEqualTo(0L);
+        assertThat(dashboard.summary().acceptanceRate()).isNull();
+        assertThat(dashboard.summary().totalProblemsSolved()).isEqualTo(0L);
+        assertThat(dashboard.activity()).hasSize(14);
+        assertThat(dashboard.verdictDistribution()).isEmpty();
+        assertThat(dashboard.languageDistribution()).isEmpty();
+        assertThat(dashboard.continueSolving()).isEmpty();
     }
 
     @Test
@@ -68,7 +71,8 @@ class AnalyticsServiceTest {
 
         when(userRepository.findByEmail("coder@example.com")).thenReturn(Optional.of(user));
         when(submissionRepository.countByUserId(1L)).thenReturn(10L);
-        when(submissionRepository.countByUserIdAndVerdict(1L, Verdict.ACCEPTED)).thenReturn(4L);
+        when(submissionRepository.countByUserIdAndStatus(1L, com.apricorn.submission.entity.SubmissionStatus.COMPLETED)).thenReturn(8L);
+        when(submissionRepository.countByUserIdAndStatusAndVerdict(1L, com.apricorn.submission.entity.SubmissionStatus.COMPLETED, Verdict.ACCEPTED)).thenReturn(4L);
         when(submissionRepository.countDistinctAttemptedProblemsByUserId(1L)).thenReturn(5L);
         when(submissionRepository.countDistinctSolvedProblemsByUserId(1L)).thenReturn(3L);
         when(submissionRepository.countDistinctSolvedProblemsByUserIdAndDifficulty(1L, Difficulty.EASY)).thenReturn(2L);
@@ -79,12 +83,53 @@ class AnalyticsServiceTest {
 
         UserDashboardResponse dashboard = analyticsService.getUserDashboard("coder@example.com");
 
-        assertThat(dashboard.totalSubmissions()).isEqualTo(10L);
-        assertThat(dashboard.acceptedSubmissions()).isEqualTo(4L);
-        assertThat(dashboard.acceptanceRate()).isEqualTo(40.0);
-        assertThat(dashboard.easySolved()).isEqualTo(2L);
-        assertThat(dashboard.mediumSolved()).isEqualTo(1L);
-        assertThat(dashboard.hardSolved()).isEqualTo(0L);
+        assertThat(dashboard.summary().totalSubmissions()).isEqualTo(10L);
+        assertThat(dashboard.summary().judgedSubmissions()).isEqualTo(8L);
+        assertThat(dashboard.summary().acceptedSubmissions()).isEqualTo(4L);
+        assertThat(dashboard.summary().acceptanceRate()).isEqualTo(50.0);
+        assertThat(dashboard.difficultyProgress().easySolved()).isEqualTo(2L);
+        assertThat(dashboard.difficultyProgress().mediumSolved()).isEqualTo(1L);
+        assertThat(dashboard.difficultyProgress().hardSolved()).isEqualTo(0L);
+        assertThat(dashboard.activity()).hasSize(14);
+    }
+
+    @Test
+    void calculatesVerdictAndLanguageDistributionAndContinueSolving() {
+        User user = new User();
+        user.setId(2L);
+        user.setUsername("analyst");
+        user.setEmail("analyst@example.com");
+
+        when(userRepository.findByEmail("analyst@example.com")).thenReturn(Optional.of(user));
+        when(submissionRepository.countByUserId(2L)).thenReturn(4L);
+        when(submissionRepository.countByUserIdAndStatus(2L, com.apricorn.submission.entity.SubmissionStatus.COMPLETED)).thenReturn(4L);
+        when(submissionRepository.countByUserIdAndStatusAndVerdict(2L, com.apricorn.submission.entity.SubmissionStatus.COMPLETED, Verdict.ACCEPTED)).thenReturn(2L);
+
+        List<Object[]> verdictList = java.util.Arrays.<Object[]>asList(
+                new Object[]{Verdict.ACCEPTED, 2L},
+                new Object[]{Verdict.WRONG_ANSWER, 1L},
+                new Object[]{Verdict.COMPILATION_ERROR, 1L}
+        );
+        when(submissionRepository.findVerdictCountsByUserId(2L)).thenReturn(verdictList);
+
+        List<Object[]> langList = java.util.Arrays.<Object[]>asList(
+                new Object[]{com.apricorn.submission.entity.Language.JAVA, 4L}
+        );
+        when(submissionRepository.findLanguageCountsByUserId(2L)).thenReturn(langList);
+
+        List<Object[]> continueList = java.util.Arrays.<Object[]>asList(
+                new Object[]{10L, "Max Subarray", "max-subarray", Difficulty.MEDIUM, java.time.Instant.now()}
+        );
+        when(submissionRepository.findRecentAttemptedUnsolvedProblemsByUserId(org.mockito.ArgumentMatchers.eq(2L), any())).thenReturn(continueList);
+
+        UserDashboardResponse dashboard = analyticsService.getUserDashboard("analyst@example.com");
+
+        assertThat(dashboard.verdictDistribution()).hasSize(3);
+        assertThat(dashboard.verdictDistribution()).extracting("verdict").containsExactly(Verdict.ACCEPTED, Verdict.WRONG_ANSWER, Verdict.COMPILATION_ERROR);
+        assertThat(dashboard.languageDistribution()).hasSize(1);
+        assertThat(dashboard.languageDistribution().get(0).language()).isEqualTo(com.apricorn.submission.entity.Language.JAVA);
+        assertThat(dashboard.continueSolving()).hasSize(1);
+        assertThat(dashboard.continueSolving().get(0).slug()).isEqualTo("max-subarray");
     }
 
     @Test

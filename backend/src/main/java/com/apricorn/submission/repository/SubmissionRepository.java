@@ -80,4 +80,24 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long>, J
 
     @Query("SELECT DISTINCT s.problem.id FROM Submission s WHERE s.user.id = :userId AND s.status = com.apricorn.submission.entity.SubmissionStatus.COMPLETED")
     List<Long> findDistinctProblemIdsByUserId(@Param("userId") Long userId);
+
+    long countByUserIdAndStatus(Long userId, com.apricorn.submission.entity.SubmissionStatus status);
+
+    long countByUserIdAndStatusAndVerdict(Long userId, com.apricorn.submission.entity.SubmissionStatus status, Verdict verdict);
+
+    @Query("SELECT s.verdict, COUNT(s.id) FROM Submission s WHERE s.user.id = :userId AND s.status = com.apricorn.submission.entity.SubmissionStatus.COMPLETED GROUP BY s.verdict")
+    List<Object[]> findVerdictCountsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT s.language, COUNT(s.id) FROM Submission s WHERE s.user.id = :userId GROUP BY s.language")
+    List<Object[]> findLanguageCountsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT s.submittedAt, s.verdict FROM Submission s WHERE s.user.id = :userId AND s.submittedAt >= :startDate")
+    List<Object[]> findSubmissionsByUserIdSince(@Param("userId") Long userId, @Param("startDate") Instant startDate);
+
+    @Query("SELECT s.problem.id, s.problem.title, s.problem.slug, s.problem.difficulty, MAX(s.submittedAt) " +
+           "FROM Submission s WHERE s.user.id = :userId AND s.status = com.apricorn.submission.entity.SubmissionStatus.COMPLETED " +
+           "AND s.problem.id NOT IN (SELECT s2.problem.id FROM Submission s2 WHERE s2.user.id = :userId AND s2.verdict = com.apricorn.submission.entity.Verdict.ACCEPTED AND s2.status = com.apricorn.submission.entity.SubmissionStatus.COMPLETED) " +
+           "GROUP BY s.problem.id, s.problem.title, s.problem.slug, s.problem.difficulty " +
+           "ORDER BY MAX(s.submittedAt) DESC")
+    List<Object[]> findRecentAttemptedUnsolvedProblemsByUserId(@Param("userId") Long userId, Pageable pageable);
 }
