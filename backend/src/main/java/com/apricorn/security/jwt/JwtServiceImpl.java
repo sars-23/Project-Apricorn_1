@@ -17,6 +17,16 @@ public class JwtServiceImpl implements JwtService {
         this.properties = properties;
     }
 
+    @jakarta.annotation.PostConstruct
+    public void validateSecret() {
+        if (properties.getSecret() == null || properties.getSecret().isBlank()) {
+            throw new IllegalStateException("JWT_SECRET environment variable is missing or empty. Application startup aborted for security.");
+        }
+        if (properties.getSecret().getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("JWT_SECRET environment variable must be at least 32 bytes/characters long. Current length: " + properties.getSecret().length());
+        }
+    }
+
     @Override
     public String generateToken(UserDetails userDetails) {
         Date now = new Date();
