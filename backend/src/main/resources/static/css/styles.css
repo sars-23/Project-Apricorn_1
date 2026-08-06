@@ -72,3 +72,26 @@ body {
 .cursor-pointer {
     cursor: pointer;
 }
+
+/* High Contrast Dark Mode Readability Utilities */
+.text-secondary-custom {
+    color: #94a3b8 !important;
+}
+
+.text-light-custom {
+    color: #cbd5e1 !important;
+}
+
+.text-subtle-custom {
+    color: #e2e8f0 !important;
+}
+
+.text-purple {
+    color: #c084fc !important;
+}
+
+.badge-purple {
+    background-color: #6b21a8 !important;
+    color: #f3e8ff !important;
+}
+
