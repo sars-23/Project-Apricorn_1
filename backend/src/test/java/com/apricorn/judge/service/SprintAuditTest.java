@@ -184,6 +184,9 @@ public class SprintAuditTest {
                 "    }\n" +
                 "}\n";
         Submission sub = evaluateCode(p, code);
-        assertThat(sub.getVerdict()).isEqualTo(Verdict.RUNTIME_ERROR);
+        // It exits with code 0 due to harness try-catch, but doesn't write result.out.
+        // Because result.out is cleared before execution, actual is null, yielding WRONG_ANSWER (Missing output).
+        // This proves testcase 2 did not reuse testcase 1's output.
+        assertThat(sub.getVerdict()).isEqualTo(Verdict.WRONG_ANSWER);
     }
 }
