@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html th:replace="~{layout :: html}">
+<head>
+    <th:block th:fragment="headContent">
+        <title>Coding Insights - Apricorn</title>
+    </th:block>
+</head>
+<body>
+    <div th:fragment="mainContent" class="container py-4">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold text-white mb-1">
+                    <i class="bi bi-lightbulb-fill text-warning me-2"></i>Coding Insights
+                </h2>
+                <p class="text-secondary mb-0">Patterns and actionable feedback from your problem-solving journey</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a th:href="@{/dashboard}" class="btn btn-outline-secondary rounded-pill px-3 fw-medium">
+                    <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                </a>
+                <a th:href="@{/problems}" class="btn btn-primary rounded-pill px-3 fw-medium">
+                    <i class="bi bi-journal-code me-1"></i> Solve Problems
+                </a>
+            </div>
+        </div>
+
+        <!-- Empty State for User with 0 Submissions -->
+        <div th:if="${insights.summary.problemsAttempted == 0}" class="card glass border-0 p-5 text-center my-4">
+            <div class="mb-3">
+                <i class="bi bi-compass text-secondary opacity-50" style="font-size: 4rem;"></i>
+            </div>
+            <h4 class="fw-bold text-white mb-2">No coding insights yet</h4>
+            <p class="text-light-custom max-width-500 mx-auto mb-4">
+                Complete a few problems and Apricorn will start finding patterns, failure trends, and performance breakthroughs in your coding journey.
+            </p>
+            <div>
+                <a th:href="@{/problems}" class="btn btn-success rounded-pill px-4 py-2 fw-bold">
+                    <i class="bi bi-play-fill me-1"></i> Start Solving
+                </a>
+            </div>
+        </div>
+
+        <!-- Non-Empty Insights View -->
+        <div th:if="${insights.summary.problemsAttempted > 0}">
+
+            <!-- Summary Metric Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card glass border-0 p-3 text-center h-100">
+                        <span class="text-light-custom super-small text-uppercase fw-semibold mb-1">Attempted</span>
+                        <h3 class="fw-bold text-white mb-0" th:text="${insights.summary.problemsAttempted}">0</h3>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card glass border-0 p-3 text-center h-100">
+                        <span class="text-light-custom super-small text-uppercase fw-semibold mb-1">Solved</span>
+                        <h3 class="fw-bold text-success mb-0" th:text="${insights.summary.problemsSolved}">0</h3>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card glass border-0 p-3 text-center h-100">
+                        <span class="text-light-custom super-small text-uppercase fw-semibold mb-1">First-Try Solves</span>
+                        <h3 class="fw-bold text-info mb-0" th:text="${insights.summary.firstTrySolves}">0</h3>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card glass border-0 p-3 text-center h-100">
+                        <span class="text-light-custom super-small text-uppercase fw-semibold mb-1">Avg Attempts</span>
+                        <h3 class="fw-bold text-warning mb-0" th:text="${insights.summary.averageAttemptsToSolve != null ? insights.summary.averageAttemptsToSolve : '—'}">—</h3>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card glass border-0 p-3 text-center h-100">
+                        <span class="text-light-custom super-small text-uppercase fw-semibold mb-1">Unsolved</span>
+                        <h3 class="fw-bold text-danger mb-0" th:text="${insights.summary.currentUnsolvedProblems}">0</h3>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card glass border-0 p-3 text-center h-100">
+                        <span class="text-light-custom super-small text-uppercase fw-semibold mb-1">Acceptance Rate</span>
+                        <h3 class="fw-bold text-white mb-0" th:text="${insights.summary.acceptedSubmissionRate != null ? insights.summary.acceptedSubmissionRate + '%' : '—'}">—</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insight Cards Grid -->
+            <div class="row g-4 mb-4" th:if="${insights.cards != null and !insights.cards.isEmpty()}">
+                <div class="col-12 col-md-6 col-lg-4" th:each="card : ${insights.cards}">
+                    <div class="card glass border-0 p-4 h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge rounded-pill px-3 py-1 super-small text-uppercase fw-bold"
+                                      th:classappend="${'bg-' + card.badgeColor}"
+                                      th:text="${card.category}">CATEGORY</span>
+                            </div>
+                            <h5 class="fw-bold text-white mb-2" th:text="${card.headline}">Headline</h5>
+                            <p class="text-light-custom small mb-3" th:text="${card.evidence}">Supporting evidence text</p>
+                        </div>
+                        <div th:if="${card.actionUrl != null}">
+                            <a th:href="@{${card.actionUrl}}" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-medium">
+                                <span th:text="${card.actionText}">Action</span> <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Blockers Section -->
+            <div class="card glass border-0 p-4 mb-4" th:if="${insights.blockers != null and !insights.blockers.isEmpty()}">
+                <h5 class="fw-bold text-white mb-3">
+                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>Active Blockers (Attempted & Unsolved)
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0 align-middle">
+                        <thead class="text-secondary">
+                            <tr>
+                                <th class="border-0">Problem</th>
+                                <th class="border-0">Difficulty</th>
+                                <th class="border-0 text-center">Attempts</th>
+                                <th class="border-0 text-center">Latest Verdict</th>
+                                <th class="border-0 text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="blocker : ${insights.blockers}">
+                                <td class="fw-bold text-white" th:text="${blocker.title}">Problem Title</td>
+                                <td>
+                                    <span class="badge" th:classappend="${blocker.difficulty.name() == 'EASY' ? 'bg-success' : (blocker.difficulty.name() == 'MEDIUM' ? 'bg-warning text-dark' : 'bg-danger')}" th:text="${blocker.difficulty.name()}">EASY</span>
+                                </td>
+                                <td class="text-center text-light-custom" th:text="${blocker.attemptCount}">1</td>
+                                <td class="text-center">
+                                    <span class="badge" th:classappend="${blocker.latestVerdict != null and blocker.latestVerdict.name() == 'WRONG_ANSWER' ? 'bg-danger' : 'bg-warning text-dark'}" th:text="${blocker.latestVerdict != null ? blocker.latestVerdict.name() : 'PENDING'}">VERDICT</span>
+                                </td>
+                                <td class="text-end">
+                                    <a th:href="@{/problems/{slug}(slug=${blocker.slug})}" class="btn btn-sm btn-success rounded-pill px-3 fw-medium">
+                                        Solve Again <i class="bi bi-play-fill"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Detailed Breakdown Row -->
+            <div class="row g-4">
+                <!-- Terminal Failure Pattern Breakdown -->
+                <div class="col-12 col-md-6" th:if="${insights.failurePatterns != null and !insights.failurePatterns.isEmpty()}">
+                    <div class="card glass border-0 p-4 h-100">
+                        <h5 class="fw-bold text-white mb-3">
+                            <i class="bi bi-bug text-danger me-2"></i>Failed Verdict Breakdown
+                        </h5>
+                        <p class="text-secondary super-small mb-3">Excludes platform/system errors (Internal Error).</p>
+                        <div class="d-flex flex-column gap-3">
+                            <div th:each="fp : ${insights.failurePatterns}">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="text-white fw-medium small" th:text="${fp.label}">Wrong Answer</span>
+                                    <span class="text-light-custom small" th:text="${fp.count + ' (' + fp.percentage + '%)'}">3 (50%)</span>
+                                </div>
+                                <div class="progress bg-dark-glass" style="height: 6px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" th:style="'width: ' + ${fp.percentage} + '%'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Difficulty Strength Breakdown -->
+                <div class="col-12 col-md-6" th:if="${insights.difficultyBreakdown != null and !insights.difficultyBreakdown.isEmpty()}">
+                    <div class="card glass border-0 p-4 h-100">
+                        <h5 class="fw-bold text-white mb-3">
+                            <i class="bi bi-bar-chart-line text-info me-2"></i>Difficulty Breakdown
+                        </h5>
+                        <div class="d-flex flex-column gap-3">
+                            <div th:each="db : ${insights.difficultyBreakdown}">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="text-white fw-medium small" th:text="${db.label}">Easy</span>
+                                    <span class="text-light-custom small" th:text="${db.solvedCount + ' of ' + db.attemptedCount + ' solved (' + db.successPercentage + '%)'}">1 of 2 solved</span>
+                                </div>
+                                <div class="progress bg-dark-glass" style="height: 6px;">
+                                    <div class="progress-bar"
+                                         th:classappend="${db.difficulty.name() == 'EASY' ? 'bg-success' : (db.difficulty.name() == 'MEDIUM' ? 'bg-warning' : 'bg-danger')}"
+                                         role="progressbar" th:style="'width: ' + ${db.successPercentage} + '%'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

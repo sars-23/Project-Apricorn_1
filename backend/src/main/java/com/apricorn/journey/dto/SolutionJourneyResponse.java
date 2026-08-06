@@ -8,5 +8,16 @@ public record SolutionJourneyResponse(
         ProblemStatus userStatus,
         JourneySummaryResponse summary,
         List<JourneyAttemptResponse> attempts,
-        String journeyStory
-) {}
+        String journeyStory,
+        List<String> journeyInsights
+) {
+    public SolutionJourneyResponse(
+            JourneyProblemResponse problem,
+            ProblemStatus userStatus,
+            JourneySummaryResponse summary,
+            List<JourneyAttemptResponse> attempts,
+            String journeyStory
+    ) {
+        this(problem, userStatus, summary, attempts, journeyStory, List.of());
+    }
+}

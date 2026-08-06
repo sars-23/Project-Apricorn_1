@@ -103,6 +103,21 @@
                     </div>
                 </div>
 
+                <!-- Problem Insights Section -->
+                <div class="row mb-4" th:if="${journey.journeyInsights != null and !journey.journeyInsights.isEmpty()}">
+                    <div class="col-12">
+                        <div class="card glass border-info border-opacity-50 p-4">
+                            <h6 class="fw-bold text-white mb-2"><i class="bi bi-lightbulb text-info me-2"></i>Journey Insights</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li th:each="ins : ${journey.journeyInsights}" class="text-light-custom small mb-1 d-flex align-items-center gap-2">
+                                    <i class="bi bi-check2-circle text-info"></i>
+                                    <span th:text="${ins}">Insight text</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Timeline Section -->
                 <div class="row">
                     <div class="col-12">

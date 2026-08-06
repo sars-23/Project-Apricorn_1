@@ -188,12 +188,43 @@ public class JourneyServiceImpl implements JourneyService {
                 submissions.get(submissions.size() - 1).getVerdict()
         );
 
+        List<String> journeyInsights = new ArrayList<>();
+        if (firstAcceptedIndex != -1) {
+            int attemptsToSolve = firstAcceptedIndex + 1;
+            if (attemptsToSolve == 1) {
+                journeyInsights.add("First-try solve! Solved on your very first submission.");
+            } else {
+                journeyInsights.add("Solved after " + attemptsToSolve + " attempts.");
+            }
+
+            Map<Verdict, Integer> preAcceptanceFailures = new EnumMap<>(Verdict.class);
+            for (int i = 0; i < firstAcceptedIndex; i++) {
+                Submission s = submissions.get(i);
+                if (s.getStatus() == SubmissionStatus.COMPLETED && s.getVerdict() != null && s.getVerdict() != Verdict.ACCEPTED && s.getVerdict() != Verdict.INTERNAL_ERROR) {
+                    preAcceptanceFailures.put(s.getVerdict(), preAcceptanceFailures.getOrDefault(s.getVerdict(), 0) + 1);
+                }
+            }
+            for (Map.Entry<Verdict, Integer> entry : preAcceptanceFailures.entrySet()) {
+                if (entry.getValue() >= 2) {
+                    journeyInsights.add(entry.getValue() + " " + formatVerdict(entry.getKey()) + " attempts occurred before acceptance.");
+                    break;
+                }
+            }
+
+            if (runtimeImprovementPercent != null && runtimeImprovementPercent > 0.0) {
+                journeyInsights.add("Runtime improved by " + runtimeImprovementPercent + "% (" + runtimeImprovementMs + " ms faster) after your first accepted solution.");
+            }
+        } else if (!submissions.isEmpty()) {
+            journeyInsights.add(submissions.size() + " attempt(s) recorded so far. Unsolved.");
+        }
+
         return new SolutionJourneyResponse(
                 problemResponse,
                 userStatus,
                 summary,
                 attemptResponses,
-                journeyStory
+                journeyStory,
+                journeyInsights
         );
     }
 
