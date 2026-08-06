@@ -236,7 +236,7 @@
                                             <span class="text-secondary-custom small">Last attempt: <span th:text="${#temporals.format(item.lastAttemptedAt, 'MMM dd, HH:mm')}">Oct 26</span></span>
                                         </div>
                                     </div>
-                                    <a th:href="@{/problems/{slug}(slug=${item.slug})}" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold">Solve Again</a>
+                                    <a th:href="@{/problems/{slug}(slug=${item.slug})}" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold">Continue <i class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
                         </div>

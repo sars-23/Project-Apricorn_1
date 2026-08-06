@@ -152,7 +152,10 @@
                                         <i class="bi bi-circle me-1"></i> Unsolved
                                     </div>
                                 </div>
-                                <a th:href="@{/problems/{slug}(slug=${problem.slug})}" class="btn btn-outline-primary rounded-pill px-4 fw-medium stretched-link">Solve</a>
+                                <a th:href="@{/problems/{slug}(slug=${problem.slug})}"
+                                   class="btn rounded-pill px-4 fw-medium stretched-link"
+                                   th:classappend="${problem.status.name() == 'SOLVED' ? 'btn-outline-success' : (problem.status.name() == 'ATTEMPTED' ? 'btn-warning text-dark' : 'btn-outline-primary')}"
+                                   th:text="${problem.status.name() == 'SOLVED' ? 'Review' : (problem.status.name() == 'ATTEMPTED' ? 'Continue' : 'Solve')}">Solve</a>
                             </div>
                         </div>
                     </div>

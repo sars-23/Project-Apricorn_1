@@ -301,6 +301,15 @@ function renderFinalVerdict(data) {
         }
     }
 
+    detailsHtml += `
+        <div class="mt-3 pt-2 border-top border-secondary border-opacity-50 d-flex justify-content-between align-items-center">
+            <span class="text-secondary small">${verdict === 'ACCEPTED' ? 'Solution accepted!' : 'Track your attempt progression'}</span>
+            <a href="/problems/${PROBLEM_SLUG}/journey" class="btn btn-sm ${verdict === 'ACCEPTED' ? 'btn-success' : 'btn-outline-info'} rounded-pill px-3 fw-bold">
+                <i class="bi bi-compass me-1"></i> ${verdict === 'ACCEPTED' ? 'View Solution Journey' : 'Review Attempt in Journey'}
+            </a>
+        </div>
+    `;
+
     updateResultUI(`${iconHtml} ${verdictText}`, detailsHtml, colorClass);
 }
 

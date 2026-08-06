@@ -94,12 +94,18 @@
                                       th:classappend="${'bg-' + card.badgeColor}"
                                       th:text="${card.category}">CATEGORY</span>
                             </div>
-                            <h5 class="fw-bold text-white mb-2" th:text="${card.headline}">Headline</h5>
-                            <p class="text-light-custom small mb-3" th:text="${card.evidence}">Supporting evidence text</p>
+                            <div class="mb-2">
+                                <span class="text-secondary-custom super-small text-uppercase fw-semibold d-block mb-1">Observation</span>
+                                <h6 class="fw-bold text-white mb-2" th:text="${card.headline}">Headline</h6>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-secondary-custom super-small text-uppercase fw-semibold d-block mb-1">Evidence</span>
+                                <p class="text-light-custom small mb-0" th:text="${card.evidence}">Supporting evidence text</p>
+                            </div>
                         </div>
-                        <div th:if="${card.actionUrl != null}">
-                            <a th:href="@{${card.actionUrl}}" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-medium">
-                                <span th:text="${card.actionText}">Action</span> <i class="bi bi-arrow-right ms-1"></i>
+                        <div th:if="${card.actionUrl != null}" class="pt-2 border-top border-secondary border-opacity-25">
+                            <a th:href="@{${card.actionUrl}}" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-medium w-100 d-flex justify-content-between align-items-center">
+                                <span th:text="${card.actionText}">Action</span> <i class="bi bi-arrow-right"></i>
                             </a>
                         </div>
                     </div>

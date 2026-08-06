@@ -7,31 +7,47 @@
     <div th:fragment="mainContent">
         
         <!-- Hero Section -->
-        <div class="container py-4 my-4">
+        <div class="container py-5 my-2">
             <div class="row align-items-center g-5">
                 <div class="col-lg-6 text-center text-lg-start">
-                    <h1 class="display-4 fw-bold mb-3">Master Java. <br/><span class="text-primary-custom">One Problem at a Time.</span></h1>
-                    <p class="lead text-muted mb-4">
-                        Elevate your coding skills on a modern, secure platform. Write, compile, and execute Java code directly in your browser with real-time feedback.
+                    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-dark-glass border border-secondary border-opacity-50 text-light-custom small mb-3">
+                        <i class="bi bi-compass text-primary-custom"></i>
+                        <span>Developer Growth Platform</span>
+                    </div>
+                    <h1 class="display-4 fw-bold mb-3 text-white">
+                        Don't just solve problems. <br/>
+                        <span class="text-primary-custom">Understand how you improve.</span>
+                    </h1>
+                    <p class="lead text-secondary mb-4">
+                        Apricorn is a developer growth platform where you solve Java challenges, track every attempt, analyze failure patterns, and measure performance gains over time.
                     </p>
                     <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-3 mb-4">
-                        <a th:href="@{/register}" class="btn btn-primary btn-lg px-5 rounded-pill fw-bold shadow-sm">Start Solving</a>
-                        <a th:href="@{/problems}" class="btn btn-outline-light btn-lg px-5 rounded-pill shadow-sm">View Problems</a>
+                        <a th:href="@{/problems}" class="btn btn-primary btn-lg px-5 rounded-pill fw-bold shadow-sm">Start Solving</a>
+                        <a th:href="@{/insights}" class="btn btn-outline-light btn-lg px-5 rounded-pill shadow-sm">Explore Insights</a>
                     </div>
                 </div>
                 <div class="col-lg-6">
                     <!-- Monaco Editor Mockup -->
                     <div class="card glass border-0 shadow-lg overflow-hidden rounded-3">
-                        <div class="bg-dark px-3 py-2 border-bottom border-secondary border-opacity-25 d-flex align-items-center gap-2">
-                            <div class="rounded-circle bg-danger" style="width: 12px; height: 12px;"></div>
-                            <div class="rounded-circle bg-warning" style="width: 12px; height: 12px;"></div>
-                            <div class="rounded-circle bg-success" style="width: 12px; height: 12px;"></div>
-                            <span class="ms-2 text-muted small font-monospace">Solution.java</span>
+                        <div class="bg-dark px-3 py-2 border-bottom border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-danger" style="width: 12px; height: 12px;"></div>
+                                <div class="rounded-circle bg-warning" style="width: 12px; height: 12px;"></div>
+                                <div class="rounded-circle bg-success" style="width: 12px; height: 12px;"></div>
+                                <span class="ms-2 text-muted small font-monospace">TwoSum.java</span>
+                            </div>
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 small font-monospace">ACCEPTED · 42ms</span>
                         </div>
                         <div class="p-3 font-monospace text-start" style="font-size: 0.9rem; overflow-x: auto; background-color: #1e1e1e; color: #d4d4d4;">
                             <span style="color: #569cd6;">public class</span> <span style="color: #4ec9b0;">Solution</span> {<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">public static void</span> <span style="color: #dcdcaa;">main</span>(<span style="color: #4ec9b0;">String</span>[] <span style="color: #9cdcfe;">args</span>) {<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #4ec9b0;">System</span>.<span style="color: #4fc1ff;">out</span>.<span style="color: #dcdcaa;">println</span>(<span style="color: #ce9178;">"Hello, Apricorn!"</span>);<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">public int</span>[] <span style="color: #dcdcaa;">twoSum</span>(<span style="color: #569cd6;">int</span>[] <span style="color: #9cdcfe;">nums</span>, <span style="color: #569cd6;">int</span> <span style="color: #9cdcfe;">target</span>) {<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">var</span> <span style="color: #9cdcfe;">map</span> = <span style="color: #569cd6;">new</span> <span style="color: #4ec9b0;">HashMap</span>&lt;<span style="color: #4ec9b0;">Integer</span>, <span style="color: #4ec9b0;">Integer</span>&gt;();<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">for</span> (<span style="color: #569cd6;">int</span> <span style="color: #9cdcfe;">i</span> = 0; <span style="color: #9cdcfe;">i</span> &lt; <span style="color: #9cdcfe;">nums</span>.<span style="color: #9cdcfe;">length</span>; <span style="color: #9cdcfe;">i</span>++) {<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">int</span> <span style="color: #9cdcfe;">diff</span> = <span style="color: #9cdcfe;">target</span> - <span style="color: #9cdcfe;">nums</span>[<span style="color: #9cdcfe;">i</span>];<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">if</span> (<span style="color: #9cdcfe;">map</span>.<span style="color: #dcdcaa;">containsKey</span>(<span style="color: #9cdcfe;">diff</span>)) <span style="color: #569cd6;">return new int</span>[] { <span style="color: #9cdcfe;">map</span>.<span style="color: #dcdcaa;">get</span>(<span style="color: #9cdcfe;">diff</span>), <span style="color: #9cdcfe;">i</span> };<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">map</span>.<span style="color: #dcdcaa;">put</span>(<span style="color: #9cdcfe;">nums</span>[<span style="color: #9cdcfe;">i</span>], <span style="color: #9cdcfe;">i</span>);<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">return new int</span>[0];<br/>
                             &nbsp;&nbsp;&nbsp;&nbsp;}<br/>
                             }
                         </div>
@@ -40,51 +56,74 @@
             </div>
         </div>
 
-        <!-- Statistics Cards -->
-        <div class="container py-4 mb-4 border-top border-bottom border-secondary border-opacity-25">
-            <div class="row text-center g-4">
+        <!-- Four-Stage Experience Loop Section -->
+        <div class="container py-4 mb-5 border-top border-secondary border-opacity-25">
+            <div class="text-center mb-5">
+                <span class="text-primary-custom text-uppercase fw-bold super-small tracking-wider">The Apricorn Growth Cycle</span>
+                <h2 class="fw-bold text-white mt-1">Four steps to measurable mastery</h2>
+            </div>
+            <div class="row g-4">
                 <div class="col-6 col-md-3">
-                    <h3 class="fw-bold text-white mb-1">500+</h3>
-                    <p class="text-muted small text-uppercase mb-0">Problems</p>
+                    <div class="card glass feature-card h-100 p-4 text-center border-0 shadow-sm transition-transform">
+                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary-custom d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 50px; height: 50px;">
+                            <i class="bi bi-code-slash fs-4"></i>
+                        </div>
+                        <span class="badge bg-primary-custom text-white mb-2 mx-auto" style="width: max-content;">STEP 1</span>
+                        <h4 class="fw-bold text-white mb-2">SOLVE</h4>
+                        <p class="text-secondary small mb-0">Write Java code inside a full Monaco Editor environment with syntax highlighting.</p>
+                    </div>
                 </div>
                 <div class="col-6 col-md-3">
-                    <h3 class="fw-bold text-white mb-1">Docker</h3>
-                    <p class="text-muted small text-uppercase mb-0">Sandbox Engine</p>
+                    <div class="card glass feature-card h-100 p-4 text-center border-0 shadow-sm transition-transform">
+                        <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 50px; height: 50px;">
+                            <i class="bi bi-cpu fs-4"></i>
+                        </div>
+                        <span class="badge bg-warning text-dark mb-2 mx-auto" style="width: max-content;">STEP 2</span>
+                        <h4 class="fw-bold text-white mb-2">SUBMIT</h4>
+                        <p class="text-secondary small mb-0">Execute solutions in Docker containers with real test cases, runtime, and memory metrics.</p>
+                    </div>
                 </div>
                 <div class="col-6 col-md-3">
-                    <h3 class="fw-bold text-white mb-1">JWT</h3>
-                    <p class="text-muted small text-uppercase mb-0">Security</p>
+                    <div class="card glass feature-card h-100 p-4 text-center border-0 shadow-sm transition-transform">
+                        <div class="rounded-circle bg-info bg-opacity-10 text-info d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 50px; height: 50px;">
+                            <i class="bi bi-diagram-3 fs-4"></i>
+                        </div>
+                        <span class="badge bg-info text-dark mb-2 mx-auto" style="width: max-content;">STEP 3</span>
+                        <h4 class="fw-bold text-white mb-2">UNDERSTAND</h4>
+                        <p class="text-secondary small mb-0">Inspect your Solution Journey timeline tracking every attempt from first try to breakthrough.</p>
+                    </div>
                 </div>
                 <div class="col-6 col-md-3">
-                    <h3 class="fw-bold text-white mb-1">&lt; 1s</h3>
-                    <p class="text-muted small text-uppercase mb-0">Real-time Judging</p>
+                    <div class="card glass feature-card h-100 p-4 text-center border-0 shadow-sm transition-transform">
+                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 50px; height: 50px;">
+                            <i class="bi bi-graph-up-arrow fs-4"></i>
+                        </div>
+                        <span class="badge bg-success text-white mb-2 mx-auto" style="width: max-content;">STEP 4</span>
+                        <h4 class="fw-bold text-white mb-2">IMPROVE</h4>
+                        <p class="text-secondary small mb-0">Leverage deterministic Solution Insights to target failure patterns and active blockers.</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Features Section -->
-        <div class="container py-4 mb-5">
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card glass feature-card h-100 p-4 text-center border-0 shadow-sm transition-transform">
-                        <i class="bi bi-shield-lock fs-1 text-primary-custom mb-3"></i>
-                        <h4 class="fw-bold text-white">Secure Execution</h4>
-                        <p class="text-muted mb-0">Your code runs in completely isolated Docker containers with strict resource limits.</p>
-                    </div>
+        <!-- Technical Credibility & Infrastructure Section -->
+        <div class="container py-4 mb-5 border-top border-secondary border-opacity-25">
+            <div class="row text-center g-4">
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold text-white mb-1">Docker</h3>
+                    <p class="text-secondary small text-uppercase mb-0">Isolated Sandbox Engine</p>
                 </div>
-                <div class="col-md-4">
-                    <div class="card glass feature-card h-100 p-4 text-center border-0 shadow-sm transition-transform">
-                        <i class="bi bi-lightning fs-1 text-warning mb-3"></i>
-                        <h4 class="fw-bold text-white">Real-time Feedback</h4>
-                        <p class="text-muted mb-0">Get instant results on your submissions with detailed test case breakdowns.</p>
-                    </div>
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold text-white mb-1">Real Metrics</h3>
+                    <p class="text-secondary small text-uppercase mb-0">Runtime & Memory</p>
                 </div>
-                <div class="col-md-4">
-                    <div class="card glass feature-card h-100 p-4 text-center border-0 shadow-sm transition-transform">
-                        <i class="bi bi-bar-chart-line fs-1 text-info mb-3"></i>
-                        <h4 class="fw-bold text-white">Rich Analytics</h4>
-                        <p class="text-muted mb-0">Track your progress, monitor acceptance rates, and compete globally.</p>
-                    </div>
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold text-white mb-1">Journey</h3>
+                    <p class="text-secondary small text-uppercase mb-0">Attempt History Timeline</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold text-white mb-1">&lt; 1s</h3>
+                    <p class="text-secondary small text-uppercase mb-0">Async Execution</p>
                 </div>
             </div>
         </div>
