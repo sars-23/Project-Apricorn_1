@@ -61,7 +61,7 @@ Configuration values are supplied via environment variables (`.env` file or syst
 
 Production database management enforces `ddl-auto: validate` to preserve data integrity.
 1. Schema initialization and incremental updates are managed automatically by Flyway (`spring.flyway.enabled=true`).
-2. Migrations `V1` through `V9` run sequentially on application startup:
+2. Migrations `V1` through `V12` run sequentially on application startup:
    - `V1`: Core schema tables.
    - `V2`–`V3`: Query indexes.
    - `V4` & `V6`: Seed canonical problems & test cases.

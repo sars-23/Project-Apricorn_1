@@ -6,7 +6,7 @@ A Java-powered developer growth platform that combines Docker-isolated code judg
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-brightgreen?logo=springboot)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql)
 ![Docker](https://img.shields.io/badge/Docker-Sandbox-2496ED?logo=docker)
-![Flyway](https://img.shields.io/badge/Flyway-V1--V9-CC0200?logo=flyway)
+![Flyway](https://img.shields.io/badge/Flyway-V1--V12-CC0200?logo=flyway)
 ![JUnit 5](https://img.shields.io/badge/Tests-111%20Passed-success?logo=junit5)
 
 ---
@@ -108,7 +108,7 @@ Apricorn preserves your complete attempt progression and turns raw execution dat
 | **Framework** | Spring Boot 3.3.5 |
 | **Security** | Spring Security, JWT (HMAC-SHA256), HttpOnly Cookies, BCrypt |
 | **Database** | PostgreSQL 16 |
-| **Schema Migrations** | Flyway (`V1` through `V9`) |
+| **Schema Migrations** | Flyway (`V1` through `V12`) |
 | **Execution Engine** | Docker Engine (`eclipse-temurin:21-jdk`) |
 | **Frontend** | Thymeleaf, Bootstrap 5, Monaco Editor, Vanilla JavaScript |
 | **Testing** | JUnit 5, Spring Boot Test, Testcontainers PostgreSQL |
