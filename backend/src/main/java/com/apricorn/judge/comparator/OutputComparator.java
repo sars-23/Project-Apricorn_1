@@ -1,50 +1,40 @@
 package com.apricorn.judge.comparator;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OutputComparator {
-    /**
-     * Compares actual output with expected output using normalized comparison.
-     * 1. Replaces CRLF (\r\n) with LF (\n)
-     * 2. Trims trailing whitespace from each line
-     * 3. Trims final trailing newlines
-     */
-    public boolean isEqual(String expected, String actual) {
-        if (expected == null && actual == null) return true;
-        if (expected == null || actual == null) return false;
+    private static final Logger log = LoggerFactory.getLogger(OutputComparator.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-        String normExpected = normalize(expected);
-        String normActual = normalize(actual);
+    public ComparisonResult compare(String expectedJson, String actualJson, String returnType) {
+        if (expectedJson == null || actualJson == null) {
+            return new ComparisonResult(false, expectedJson, actualJson, "Missing output");
+        }
 
-        return normExpected.equals(normActual);
-    }
+        try {
+            JsonNode expectedNode = objectMapper.readTree(expectedJson);
+            JsonNode actualNode = objectMapper.readTree(actualJson);
 
-    public String normalize(String input) {
-        if (input == null) return "";
-        String text = input.replace("\r\n", "\n").replace('\r', '\n');
+            boolean isMatch = expectedNode.equals(actualNode);
 
-        String[] lines = text.split("\n", -1);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < lines.length; i++) {
-            sb.append(trimTrailingWhitespace(lines[i]));
-            if (i < lines.length - 1) {
-                sb.append("\n");
+            String expectedFormatted = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expectedNode);
+            String actualFormatted = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(actualNode);
+
+            if (isMatch) {
+                return new ComparisonResult(true, expectedFormatted, actualFormatted, null);
+            } else {
+                return new ComparisonResult(false, expectedFormatted, actualFormatted, "Return value did not match expected value.");
             }
+        } catch (Exception e) {
+            log.error("Failed to parse JSON for comparison. Expected: {}, Actual: {}", expectedJson, actualJson, e);
+            return new ComparisonResult(false, expectedJson, actualJson, "Malformed result structure.");
         }
-
-        String result = sb.toString();
-        while (result.endsWith("\n")) {
-            result = result.substring(0, result.length() - 1);
-        }
-        return result;
     }
 
-    private String trimTrailingWhitespace(String line) {
-        int len = line.length();
-        while (len > 0 && Character.isWhitespace(line.charAt(len - 1))) {
-            len--;
-        }
-        return line.substring(0, len);
-    }
+    public record ComparisonResult(boolean isMatch, String expectedFormatted, String actualFormatted, String errorReason) {}
 }

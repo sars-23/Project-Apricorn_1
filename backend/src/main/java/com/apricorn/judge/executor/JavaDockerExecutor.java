@@ -25,10 +25,12 @@ public class JavaDockerExecutor implements LanguageExecutor {
     private static final Logger log = LoggerFactory.getLogger(JavaDockerExecutor.class);
     private final DockerRunner dockerRunner;
     private final OutputComparator outputComparator;
+    private final JavaHarnessGenerator javaHarnessGenerator;
 
-    public JavaDockerExecutor(DockerRunner dockerRunner, OutputComparator outputComparator) {
+    public JavaDockerExecutor(DockerRunner dockerRunner, OutputComparator outputComparator, JavaHarnessGenerator javaHarnessGenerator) {
         this.dockerRunner = dockerRunner;
         this.outputComparator = outputComparator;
+        this.javaHarnessGenerator = javaHarnessGenerator;
     }
 
     @Override
@@ -45,10 +47,17 @@ public class JavaDockerExecutor implements LanguageExecutor {
             );
         }
 
-        if (!submission.getSourceCode().contains("public class Main")) {
+        if (submission.getSourceCode().contains("public static void main")) {
             return new JudgeResult(
                     Verdict.COMPILATION_ERROR, 0, 0, 0, testCases.size(),
-                    "Java submission contract violation: Source code must define 'public class Main'."
+                    "Java submission contract violation: User-defined 'main' method is not allowed."
+            );
+        }
+
+        if (submission.getSourceCode().contains("import ")) {
+            return new JudgeResult(
+                    Verdict.COMPILATION_ERROR, 0, 0, 0, testCases.size(),
+                    "Java submission contract violation: Explicit import statements are not allowed."
             );
         }
 
@@ -58,13 +67,17 @@ public class JavaDockerExecutor implements LanguageExecutor {
 
         try {
             Files.createDirectories(workspacePath);
-            File sourceFile = new File(workspaceDir, "Main.java");
-            Files.writeString(sourceFile.toPath(), submission.getSourceCode());
+            File solutionFile = new File(workspaceDir, "Solution.java");
+            Files.writeString(solutionFile.toPath(), submission.getSourceCode());
+
+            String mainCode = javaHarnessGenerator.generateHarness(submission.getProblem(), testCases);
+            File mainFile = new File(workspaceDir, "Main.java");
+            Files.writeString(mainFile.toPath(), mainCode);
 
             ExecutionResult compileResult = dockerRunner.runContainer(
                     properties.getJavaImage(),
                     workspaceDir,
-                    "javac Main.java",
+                    "javac Main.java Solution.java",
                     null,
                     properties.getCompileTimeoutMs(),
                     properties.getContainerMemoryMb(),
@@ -105,12 +118,21 @@ public class JavaDockerExecutor implements LanguageExecutor {
             int timeLimitMs = submission.getProblem() != null ? submission.getProblem().getTimeLimitMs() : 2000;
             int memoryLimitMb = submission.getProblem() != null ? submission.getProblem().getMemoryLimitMb() : properties.getContainerMemoryMb();
 
-            for (TestCase tc : sortedTestCases) {
+            File resultFile = new File(workspaceDir, "result.out");
+
+            for (int i = 0; i < sortedTestCases.size(); i++) {
+                TestCase tc = sortedTestCases.get(i);
+                
+                // Ensure result file freshness
+                if (resultFile.exists()) {
+                    resultFile.delete();
+                }
+
                 ExecutionResult execResult = dockerRunner.runContainer(
                         properties.getJavaImage(),
                         workspaceDir,
-                        "java Main",
-                        tc.getInput(),
+                        "java Main " + i,
+                        null,
                         timeLimitMs,
                         memoryLimitMb,
                         properties.getContainerCpus(),
@@ -159,16 +181,41 @@ public class JavaDockerExecutor implements LanguageExecutor {
                             0,
                             passedCases,
                             totalCases,
-                            "Runtime error (exit code " + execResult.exitCode() + ")."
+                            "Runtime error (exit code " + execResult.exitCode() + "). " + (execResult.stderr() != null ? execResult.stderr().trim() : "")
                     );
                 }
 
-                if (!outputComparator.isEqual(tc.getExpectedOutput(), execResult.stdout())) {
-                    String formattedError = "Failed Test Case:\n" + tc.getInput() + 
-                                            "\n\nExpected Output:\n" + tc.getExpectedOutput() + 
-                                            "\n\nActual Output:\n" + (execResult.stdout() != null ? execResult.stdout() : "");
+                String actualJson = null;
+                if (resultFile.exists()) {
+                    actualJson = Files.readString(resultFile.toPath());
+                }
+
+                OutputComparator.ComparisonResult compResult = outputComparator.compare(tc.getExpectedOutput(), actualJson, submission.getProblem().getReturnType());
+
+                if (!compResult.isMatch()) {
+                    String formattedError = "Failed Test Case:\n" + tc.getInput();
+                    
+                    if (compResult.errorReason() != null) {
+                        formattedError += "\n\nError:\n" + compResult.errorReason();
+                    }
+
+                    if (compResult.expectedFormatted() != null) {
+                        formattedError += "\n\nExpected Return:\n" + compResult.expectedFormatted();
+                    }
+                    if (compResult.actualFormatted() != null) {
+                        formattedError += "\n\nActual Return:\n" + compResult.actualFormatted();
+                    }
+
+                    if (execResult.stdout() != null && !execResult.stdout().trim().isEmpty()) {
+                        formattedError += "\n\nStandard Output:\n" + execResult.stdout().trim();
+                    }
+
+                    Verdict verdict = "Internal formatting error in result.".equals(compResult.errorReason()) || "Malformed result structure.".equals(compResult.errorReason())
+                            ? Verdict.INTERNAL_ERROR 
+                            : Verdict.WRONG_ANSWER;
+
                     return new JudgeResult(
-                            Verdict.WRONG_ANSWER,
+                            verdict,
                             (int) maxExecutionTimeMs,
                             0,
                             passedCases,

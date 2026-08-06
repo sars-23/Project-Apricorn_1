@@ -36,12 +36,13 @@ Restricted Docker Container
 SubmissionService (Persists Verdict & Metrics to PostgreSQL)
 ```
 
-## Java Submission Contract
+## Java Submission Contract (V1 Function Contract)
 
-Submissions must conform to the standard competitive programming Java contract:
-- Code must define `public class Main`.
-- Input is read from standard input (`System.in` / `Scanner`).
-- Output is written to standard output (`System.out.println`).
+Submissions must conform to the new V1 function-based contract:
+- Code must define `class Solution` (or similar non-public top-level class).
+- Code must implement the method specified by `Problem.methodName` with matching `Problem.returnType` and `Problem.parameterMetadata`.
+- The judge dynamically generates a `Main.java` harness to instantiate `Solution`, deserialize JSON test cases, invoke the function, and compare the structured returned output.
+- Direct standard input (`System.in`) and standard output (`System.out.println`) are ignored and should not be used for correctness.
 
 ## Configuration Properties (`application.yml`)
 
@@ -58,14 +59,14 @@ judge:
 
 ## Execution Flow & Verdict Mapping
 
-1. **Workspace Provisioning**: Creates an isolated temporary directory (`/tmp/apricorn-judge/<submissionId>-<uuid>/`) and writes `Main.java`.
-2. **Compilation**: Invokes `javac Main.java` inside Docker container. If compilation fails or times out, returns `COMPILATION_ERROR` with sanitized stderr.
-3. **Test Case Iteration**: Executes `java Main` for each test case ordered by `orderIndex`.
+1. **Workspace Provisioning**: Creates an isolated temporary directory (`/tmp/apricorn-judge/<submissionId>-<uuid>/`), writes user's `Solution.java`, and generates `Main.java` harness based on Problem contract.
+2. **Compilation**: Invokes `javac Main.java Solution.java` inside Docker container. If compilation fails or times out, returns `COMPILATION_ERROR` with sanitized stderr.
+3. **Test Case Iteration**: Executes `java Main <testCaseIndex>` for each testcase ordered by `orderIndex`.
 4. **Limits & Verdict Mapping**:
    - Time Limit: Exceeding `Problem.timeLimitMs` -> `TIME_LIMIT_EXCEEDED`
    - Output Limit: Exceeding 1 MB -> `RUNTIME_ERROR`
    - Non-zero Exit Code / Exception -> `RUNTIME_ERROR`
-   - Output Mismatch (via `OutputComparator`) -> `WRONG_ANSWER`
+   - Output Mismatch (via typed `OutputComparator` reading from `result.out`) -> `WRONG_ANSWER`
    - All Test Cases Pass -> `ACCEPTED`
    - Infrastructure Failure -> `INTERNAL_ERROR`
 5. **Defensive Cleanup**: Temporary workspace directory is always deleted in a `finally` block.

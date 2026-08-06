@@ -166,7 +166,8 @@ public class ProblemServiceImpl implements ProblemService {
         Sort parseSort = parseSortParam(sort);
         Pageable pageable = PageRequest.of(pageNum, pageSize, parseSort);
 
-        Specification<Problem> spec = Specification.where(ProblemSpecifications.hasDifficulty(difficulty))
+        Specification<Problem> spec = Specification.where(ProblemSpecifications.isVisible())
+                .and(ProblemSpecifications.hasDifficulty(difficulty))
                 .and(ProblemSpecifications.hasTagSlug(tagSlug))
                 .and(ProblemSpecifications.searchByTitle(search))
                 .and(ProblemSpecifications.hasUserStatus(status, solvedProblemIds, attemptedOnlyProblemIds, allUserProblemIds));

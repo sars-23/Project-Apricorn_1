@@ -6,11 +6,10 @@ let lastSubmittedCode = null;
 require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
 
 require(['vs/editor/editor.main'], function() {
-    const defaultCode = `public class Solution {
-    public static void main(String[] args) {
-        // Write your code here
-        
-    }
+    const defaultCode = (typeof PROBLEM_STARTER_CODE !== 'undefined' && PROBLEM_STARTER_CODE) 
+        ? PROBLEM_STARTER_CODE 
+        : `class Solution {
+    
 }`;
 
     // Load drafted code from local storage if exists
@@ -57,13 +56,12 @@ require(['vs/editor/editor.main'], function() {
 
 function resetCode() {
     if (confirm('Are you sure you want to reset your code? This will clear your current draft.')) {
-        const defaultCode = `public class Solution {
-    public static void main(String[] args) {
-        // Write your code here
-        
-    }
+        const codeToSet = (typeof PROBLEM_STARTER_CODE !== 'undefined' && PROBLEM_STARTER_CODE) 
+            ? PROBLEM_STARTER_CODE 
+            : `class Solution {
+    
 }`;
-        editor.setValue(defaultCode);
+        editor.setValue(codeToSet);
         localStorage.removeItem(`apricorn_draft_${PROBLEM_SLUG}`);
     }
 }

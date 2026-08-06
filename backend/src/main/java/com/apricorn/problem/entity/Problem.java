@@ -21,6 +21,8 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -69,6 +71,22 @@ public class Problem {
 
     @Column(columnDefinition = "TEXT")
     private String explanation;
+
+    @Column(length = 255)
+    private String methodName;
+
+    @Column(length = 255)
+    private String returnType;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "JSONB")
+    private String parameterMetadata;
+
+    @Column(columnDefinition = "TEXT")
+    private String starterCode;
+
+    @Column(nullable = false)
+    private boolean isVisible = true;
 
     @Column(nullable = false)
     private int timeLimitMs = 2000;
@@ -131,6 +149,16 @@ public class Problem {
     public void setSampleOutput(String sampleOutput) { this.sampleOutput = sampleOutput; }
     public String getExplanation() { return explanation; }
     public void setExplanation(String explanation) { this.explanation = explanation; }
+    public String getMethodName() { return methodName; }
+    public void setMethodName(String methodName) { this.methodName = methodName; }
+    public String getReturnType() { return returnType; }
+    public void setReturnType(String returnType) { this.returnType = returnType; }
+    public String getParameterMetadata() { return parameterMetadata; }
+    public void setParameterMetadata(String parameterMetadata) { this.parameterMetadata = parameterMetadata; }
+    public String getStarterCode() { return starterCode; }
+    public void setStarterCode(String starterCode) { this.starterCode = starterCode; }
+    public boolean isVisible() { return isVisible; }
+    public void setVisible(boolean visible) { isVisible = visible; }
     public int getTimeLimitMs() { return timeLimitMs; }
     public void setTimeLimitMs(int timeLimitMs) { this.timeLimitMs = timeLimitMs; }
     public int getMemoryLimitMb() { return memoryLimitMb; }

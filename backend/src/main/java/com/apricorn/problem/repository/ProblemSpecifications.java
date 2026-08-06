@@ -9,6 +9,10 @@ import org.springframework.data.jpa.domain.Specification;
 public final class ProblemSpecifications {
     private ProblemSpecifications() {}
 
+    public static Specification<Problem> isVisible() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.isTrue(root.get("isVisible"));
+    }
+
     public static Specification<Problem> hasDifficulty(Difficulty difficulty) {
         return (root, query, criteriaBuilder) -> {
             if (difficulty == null) return null;

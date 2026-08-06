@@ -1,7 +1,8 @@
 spring:
   datasource:
-    url: jdbc:tc:postgresql:16-alpine:///apricorn_test
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: jdbc:postgresql://localhost:5432/apricorn
+    username: apricorn
+    password: apricorn
   jpa:
     hibernate:
       ddl-auto: validate
@@ -11,6 +12,9 @@ spring:
         format_sql: false
   flyway:
     enabled: true
+    url: jdbc:postgresql://localhost:5432/apricorn
+    user: apricorn
+    password: apricorn
 
 jwt:
   secret: supersecretkey_for_testing_purposes_only_which_is_long_enough
