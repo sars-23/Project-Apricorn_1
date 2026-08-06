@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html th:replace="~{layout :: html}">
+<head>
+    <th:block th:fragment="headContent">
+        <title th:text="${journey.problem.title + ' - Solution Journey - Project Apricorn'}">Solution Journey - Project Apricorn</title>
+    </th:block>
+</head>
+<body>
+    <div th:fragment="mainContent">
+        
+        <div class="container py-4 my-4">
+            
+            <!-- Back Link & Header -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <a th:href="@{/problems/{slug}(slug=${journey.problem.slug})}" class="text-primary-custom text-decoration-none fw-medium small mb-2 d-inline-block">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Workspace
+                    </a>
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <h2 class="fw-bold text-white mb-1" th:text="${journey.problem.title}">Two Sum</h2>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge"
+                                      th:classappend="${journey.problem.difficulty.name() == 'EASY' ? 'bg-success' : (journey.problem.difficulty.name() == 'MEDIUM' ? 'bg-warning' : 'bg-danger')}"
+                                      th:text="${journey.problem.difficulty.name()}">EASY</span>
+                                <span class="badge"
+                                      th:classappend="${journey.userStatus.name() == 'SOLVED' ? 'bg-success' : (journey.userStatus.name() == 'ATTEMPTED' ? 'bg-warning text-dark' : 'bg-secondary')}"
+                                      th:text="${journey.userStatus.name()}">SOLVED</span>
+                            </div>
+                        </div>
+                        <div>
+                            <a th:href="@{/problems/{slug}(slug=${journey.problem.slug})}" class="btn btn-primary rounded-pill px-4 fw-medium">
+                                <i class="bi bi-play-circle me-1"></i> Open Workspace
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${journey.summary.totalAttempts == 0}" class="row my-5">
+                <div class="col-12 text-center py-5">
+                    <div class="card glass border-0 p-5 max-w-600 mx-auto">
+                        <i class="bi bi-compass text-secondary-custom fs-1 mb-3"></i>
+                        <h4 class="fw-bold text-white mb-2">No attempts yet</h4>
+                        <p class="text-light-custom mb-4">You have not submitted any solutions for this problem yet. Start your coding journey now!</p>
+                        <div>
+                            <a th:href="@{/problems/{slug}(slug=${journey.problem.slug})}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold">
+                                Start Solving
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Non-Empty Journey View -->
+            <div th:if="${journey.summary.totalAttempts > 0}">
+                
+                <!-- Journey Summary Metric Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3 col-lg">
+                        <div class="card glass border-0 p-3 h-100 text-center">
+                            <span class="text-light-custom super-small text-uppercase fw-semibold mb-1">Total Attempts</span>
+                            <h3 class="fw-bold text-white mb-0" th:text="${journey.summary.totalAttempts}">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 col-lg">
+                        <div class="card glass border-0 p-3 h-100 text-center">
+                            <span class="text-light-custom super-small text-uppercase fw-semibold mb-1">First Accepted</span>
+                            <h3 class="fw-bold text-white mb-0" th:text="${journey.summary.firstAcceptedAttemptNumber != null ? 'Attempt #' + journey.summary.firstAcceptedAttemptNumber : '—'}">—</h3>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 col-lg">
+                        <div class="card glass border-0 p-3 h-100 text-center">
+                            <span class="text-light-custom super-small text-uppercase fw-semibold mb-1">Accepted Solutions</span>
+                            <h3 class="fw-bold text-white mb-0" th:text="${journey.summary.acceptedSubmissionsCount}">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 col-lg">
+                        <div class="card glass border-0 p-3 h-100 text-center">
+                            <span class="text-light-custom super-small text-uppercase fw-semibold mb-1">Best Runtime</span>
+                            <h3 class="fw-bold text-white mb-0" th:text="${journey.summary.bestRuntimeMs != null ? journey.summary.bestRuntimeMs + ' ms' : '—'}">—</h3>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 col-lg">
+                        <div class="card glass border-0 p-3 h-100 text-center">
+                            <span class="text-light-custom super-small text-uppercase fw-semibold mb-1">Best Memory</span>
+                            <h3 class="fw-bold text-white mb-0" th:text="${journey.summary.bestMemoryKb != null ? journey.summary.bestMemoryKb + ' KB' : '—'}">—</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Journey Story Alert -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card glass border-primary border-opacity-50 p-4 d-flex flex-row align-items-center gap-3">
+                            <i class="bi bi-compass text-primary-custom fs-3"></i>
+                            <div>
+                                <h6 class="fw-bold text-white mb-1">Journey Story</h6>
+                                <p class="text-light-custom mb-0" th:text="${journey.journeyStory}">Accepted after 3 attempts.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline Section -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card glass border-0 p-4">
+                            <h5 class="fw-bold text-white mb-4"><i class="bi bi-diagram-3 me-2 text-primary-custom"></i>Submission Timeline</h5>
+
+                            <div class="timeline position-relative ps-3 ps-md-4">
+                                
+                                <div th:each="att, iterStat : ${journey.attempts}" class="timeline-item position-relative mb-4 pb-3">
+                                    <div class="card glass border-secondary border-opacity-25 p-3">
+                                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                <h6 class="fw-bold text-white mb-0" th:text="${'Attempt #' + att.attemptNumber}">Attempt #1</h6>
+                                                
+                                                <!-- Milestone Badges -->
+                                                <span th:if="${att.isFirstAccepted}" class="badge bg-success text-white"><i class="bi bi-star-fill me-1"></i>FIRST ACCEPTED</span>
+                                                <span th:if="${att.isBestRuntime}" class="badge bg-info text-dark"><i class="bi bi-lightning-charge-fill me-1"></i>PERSONAL BEST — RUNTIME</span>
+                                                <span th:if="${att.isBestMemory}" class="badge badge-purple"><i class="bi bi-cpu-fill me-1"></i>PERSONAL BEST — MEMORY</span>
+                                            </div>
+
+                                            <span class="text-secondary-custom small" th:text="${#temporals.format(att.submittedAt, 'MMM dd, yyyy HH:mm:ss')}">Aug 06, 12:41</span>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                            <!-- Verdict Badge -->
+                                            <span th:if="${att.verdict != null}"
+                                                  th:class="${att.verdict.name() == 'ACCEPTED' ? 'badge bg-success' : (att.verdict.name() == 'WRONG_ANSWER' ? 'badge bg-warning text-dark' : (att.verdict.name() == 'COMPILATION_ERROR' ? 'badge bg-danger' : 'badge bg-secondary'))}"
+                                                  th:text="${att.verdict}">ACCEPTED</span>
+                                            <span th:if="${att.verdict == null}" class="badge bg-secondary text-muted">PENDING</span>
+
+                                            <span class="badge bg-secondary text-light border" th:text="${att.language}">JAVA</span>
+                                            
+                                            <span th:if="${att.executionTimeMs != null}" class="text-subtle-custom small fw-medium" th:text="${att.executionTimeMs + ' ms'}">0 ms</span>
+                                            <span th:if="${att.memoryUsedKb != null}" class="text-subtle-custom small fw-medium" th:text="${att.memoryUsedKb + ' KB'}">0 KB</span>
+                                        </div>
+
+                                        <!-- Error Message Panel -->
+                                        <div th:if="${att.errorMessage != null && !#strings.isEmpty(att.errorMessage)}" class="alert bg-dark text-danger border-danger border-opacity-50 mt-2 py-2 px-3 small font-monospace mb-2">
+                                            <div class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Judge Output / Error:</div>
+                                            <pre class="mb-0 text-danger" style="white-space: pre-wrap;" th:text="${att.errorMessage}">Compiler message</pre>
+                                        </div>
+
+                                        <!-- Expandable Source Code -->
+                                        <details class="mt-2">
+                                            <summary class="text-primary-custom cursor-pointer small fw-medium">
+                                                <i class="bi bi-code-slash me-1"></i>View Code
+                                            </summary>
+                                            <pre class="bg-dark text-light p-3 rounded mt-2 border border-secondary border-opacity-25 overflow-auto" style="max-height: 400px;"><code th:text="${att.sourceCode}">class Solution {}</code></pre>
+                                        </details>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    
+    <th:block th:fragment="scripts"></th:block>
+</body>
+</html>

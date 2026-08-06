@@ -6,6 +6,7 @@ import com.apricorn.auth.service.AuthService;
 import com.apricorn.problem.service.ProblemService;
 import com.apricorn.problem.service.TagService;
 import com.apricorn.security.jwt.JwtService;
+import com.apricorn.submission.repository.SubmissionRepository;
 import com.apricorn.submission.service.SubmissionService;
 import com.apricorn.user.dto.UserResponse;
 import com.apricorn.user.entity.Role;
@@ -72,6 +73,9 @@ class WebControllerTest {
 
     @MockBean
     private SubmissionService submissionService;
+
+    @MockBean
+    private SubmissionRepository submissionRepository;
 
     @MockBean
     private JwtService jwtService;

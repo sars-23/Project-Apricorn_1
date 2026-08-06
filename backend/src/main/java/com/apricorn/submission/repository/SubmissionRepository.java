@@ -100,4 +100,9 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long>, J
            "GROUP BY s.problem.id, s.problem.title, s.problem.slug, s.problem.difficulty " +
            "ORDER BY MAX(s.submittedAt) DESC")
     List<Object[]> findRecentAttemptedUnsolvedProblemsByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"problem", "user"})
+    List<Submission> findByUserIdAndProblemIdOrderBySubmittedAtAsc(Long userId, Long problemId);
+
+    boolean existsByUserIdAndProblemId(Long userId, Long problemId);
 }

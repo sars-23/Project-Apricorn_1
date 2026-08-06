@@ -45,7 +45,10 @@
                             <tr th:each="submission : ${submissionPage.content}">
                                 <td class="px-4 py-3 text-muted" th:text="${#temporals.format(submission.submittedAt, 'MMM dd, yyyy HH:mm')}">Time</td>
                                 <td class="px-4 py-3 fw-bold">
-                                    <a th:href="@{/problems/{slug}(slug=${submission.problem.slug})}" class="text-white text-decoration-none" th:text="${submission.problem.title}">Problem Title</a>
+                                    <a th:href="@{/problems/{slug}(slug=${submission.problem.slug})}" class="text-white text-decoration-none me-2" th:text="${submission.problem.title}">Problem Title</a>
+                                    <a th:href="@{/problems/{slug}/journey(slug=${submission.problem.slug})}" class="text-info text-decoration-none small" title="View Solution Journey">
+                                        <i class="bi bi-compass"></i>
+                                    </a>
                                 </td>
                                 <td class="px-4 py-3">
                                     <span class="badge fs-7 px-3 py-2" 

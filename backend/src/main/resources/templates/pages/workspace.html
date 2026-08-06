@@ -12,9 +12,14 @@
         <div class="row g-0" style="height: calc(100vh - 72px);">
             <!-- Left Panel: Problem Details -->
             <div class="col-lg-5 col-xl-4 bg-dark-glass overflow-auto p-4 border-end border-secondary" style="height: 100%;">
-                <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                     <h2 class="mb-0 text-white" th:text="${problem.title}">Problem Title</h2>
-                    <span class="badge fs-6 px-3 py-2" th:classappend="${problem.difficulty.name() == 'EASY' ? 'bg-success' : (problem.difficulty.name() == 'MEDIUM' ? 'bg-warning text-dark' : 'bg-danger')}" th:text="${problem.difficulty.name()}">DIFFICULTY</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge fs-6 px-3 py-2" th:classappend="${problem.difficulty.name() == 'EASY' ? 'bg-success' : (problem.difficulty.name() == 'MEDIUM' ? 'bg-warning text-dark' : 'bg-danger')}" th:text="${problem.difficulty.name()}">DIFFICULTY</span>
+                        <a th:if="${hasJourney}" th:href="@{/problems/{slug}/journey(slug=${problem.slug})}" class="btn btn-outline-info btn-sm rounded-pill px-3 fw-medium">
+                            <i class="bi bi-compass me-1"></i> View My Journey
+                        </a>
+                    </div>
                 </div>
                 
                 <!-- Constraints & Formats -->

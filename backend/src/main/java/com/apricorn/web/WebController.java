@@ -19,6 +19,8 @@ import com.apricorn.auth.dto.LoginRequest;
 import com.apricorn.auth.dto.AuthResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Cookie;
+import com.apricorn.submission.repository.SubmissionRepository;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -32,14 +34,18 @@ public class WebController {
     private final AuthService authService;
     private final SubmissionService submissionService;
 
+    private final SubmissionRepository submissionRepository;
+
     public WebController(AnalyticsService analyticsService, UserService userService, ProblemService problemService,
-            TagService tagService, AuthService authService, SubmissionService submissionService) {
+            TagService tagService, AuthService authService, SubmissionService submissionService,
+            SubmissionRepository submissionRepository) {
         this.analyticsService = analyticsService;
         this.userService = userService;
         this.problemService = problemService;
         this.tagService = tagService;
         this.authService = authService;
         this.submissionService = submissionService;
+        this.submissionRepository = submissionRepository;
     }
 
     @GetMapping("/")
@@ -152,8 +158,20 @@ public class WebController {
     }
 
     @GetMapping("/problems/{slug}")
-    public String workspace(@org.springframework.web.bind.annotation.PathVariable String slug, Model model) {
-        model.addAttribute("problem", problemService.getProblemBySlug(slug));
+    public String workspace(
+            @PathVariable String slug,
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model) {
+        var problem = problemService.getProblemBySlug(slug);
+        boolean hasJourney = false;
+        if (userDetails != null) {
+            try {
+                var user = userService.getCurrentUser(userDetails.getUsername());
+                hasJourney = submissionRepository.existsByUserIdAndProblemId(user.id(), problem.id());
+            } catch (Exception ignored) {}
+        }
+        model.addAttribute("problem", problem);
+        model.addAttribute("hasJourney", hasJourney);
         return "pages/workspace";
     }
 
