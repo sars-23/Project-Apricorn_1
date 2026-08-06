@@ -1,40 +1,123 @@
+/* Project Apricorn Shared Dark Theme System */
 :root {
-    --primary: #4CAF50;
-    --primary-hover: #45a049;
-    --bg-dark: #0f172a;
-    --card-bg: #1e293b;
-    --accent: #22c55e;
+    --ap-bg-primary: #0f172a;        /* Main dark background */
+    --ap-bg-secondary: #1e293b;      /* Secondary dark / card background */
+    --ap-bg-card: rgba(30, 41, 59, 0.75); /* Glass card background */
+    --ap-border: rgba(255, 255, 255, 0.1);
+
+    --ap-text-primary: #f8fafc;      /* High contrast near-white */
+    --ap-text-secondary: #cbd5e1;    /* Light slate gray */
+    --ap-text-muted: #94a3b8;        /* Soft gray (readable) */
+
+    --ap-green: #22c55e;
+    --ap-green-hover: #16a34a;
+    --ap-yellow: #eab308;
+    --ap-red: #ef4444;
+    --ap-purple: #a855f7;
+    --ap-blue: #3b82f6;
+
+    --primary: var(--ap-green);
+    --primary-hover: var(--ap-green-hover);
+    --bg-dark: var(--ap-bg-primary);
+    --card-bg: var(--ap-bg-secondary);
+    --accent: var(--ap-green);
 }
 
 body {
-    background-color: var(--bg-dark);
+    background-color: var(--ap-bg-primary);
+    color: var(--ap-text-primary);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-.text-primary-custom {
-    color: var(--primary) !important;
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--ap-text-primary);
 }
 
+/* Standardized Bootstrap Text Overrides for Dark Mode */
+.text-muted {
+    color: var(--ap-text-muted) !important;
+}
+
+.text-secondary {
+    color: var(--ap-text-secondary) !important;
+}
+
+.text-dark {
+    color: var(--ap-text-primary) !important;
+}
+
+.text-primary-custom {
+    color: var(--ap-green) !important;
+}
+
+.text-secondary-custom {
+    color: var(--ap-text-muted) !important;
+}
+
+.text-light-custom {
+    color: var(--ap-text-secondary) !important;
+}
+
+.text-subtle-custom {
+    color: var(--ap-text-primary) !important;
+}
+
+.text-purple {
+    color: #c084fc !important;
+}
+
+/* Buttons */
 .bg-primary {
-    background-color: var(--primary) !important;
+    background-color: var(--ap-green) !important;
 }
 
 .btn-primary {
-    background-color: var(--primary);
-    border-color: var(--primary);
+    background-color: var(--ap-green);
+    border-color: var(--ap-green);
+    color: #ffffff;
 }
 
-.btn-primary:hover {
-    background-color: var(--primary-hover);
-    border-color: var(--primary-hover);
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--ap-green-hover);
+    border-color: var(--ap-green-hover);
+    color: #ffffff;
 }
 
-/* Glassmorphism */
+.btn-outline-light {
+    color: var(--ap-text-primary);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.btn-outline-light:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--ap-text-primary);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-outline-secondary {
+    color: var(--ap-text-secondary);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.btn-outline-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--ap-text-primary);
+}
+
+/* Glassmorphism & Cards */
+.card {
+    background-color: var(--ap-bg-secondary);
+    border: 1px solid var(--ap-border);
+    border-radius: 1rem;
+    color: var(--ap-text-primary);
+}
+
 .glass {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(30, 41, 59, 0.75) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .bg-dark-glass {
@@ -43,9 +126,67 @@ body {
     -webkit-backdrop-filter: blur(12px);
 }
 
-/* Auth Cards */
-.card {
-    border-radius: 1rem;
+/* Form Controls & Labels */
+.form-label {
+    color: var(--ap-text-secondary);
+    font-weight: 500;
+}
+
+.form-control, .form-select {
+    background-color: rgba(15, 23, 42, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: var(--ap-text-primary) !important;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: rgba(15, 23, 42, 0.95) !important;
+    border-color: var(--ap-green) !important;
+    box-shadow: 0 0 0 0.25rem rgba(34, 197, 94, 0.25) !important;
+    color: var(--ap-text-primary) !important;
+}
+
+.form-control::placeholder {
+    color: #64748b !important;
+    opacity: 1;
+}
+
+.input-group-text {
+    background-color: rgba(15, 23, 42, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: var(--ap-text-muted) !important;
+}
+
+/* Dropdowns */
+.dropdown-menu {
+    background-color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.dropdown-item {
+    color: var(--ap-text-secondary) !important;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: var(--ap-text-primary) !important;
+}
+
+.dropdown-divider {
+    border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Semantic Badges */
+.badge-purple {
+    background-color: rgba(168, 85, 247, 0.2) !important;
+    color: #c084fc !important;
+    border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+.bg-secondary-custom {
+    background-color: rgba(100, 116, 139, 0.25) !important;
+    color: var(--ap-text-secondary) !important;
+    border: 1px solid rgba(100, 116, 139, 0.3);
 }
 
 /* Animations & Transitions */
@@ -64,34 +205,14 @@ body {
 
 .problem-card .card:hover {
     transform: translateY(-2px);
-    border-color: var(--primary) !important;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2) !important;
+    border-color: var(--ap-green) !important;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2) !important;
 }
 
-/* Utility */
 .cursor-pointer {
     cursor: pointer;
 }
 
-/* High Contrast Dark Mode Readability Utilities */
-.text-secondary-custom {
-    color: #94a3b8 !important;
+.super-small {
+    font-size: 0.75rem;
 }
-
-.text-light-custom {
-    color: #cbd5e1 !important;
-}
-
-.text-subtle-custom {
-    color: #e2e8f0 !important;
-}
-
-.text-purple {
-    color: #c084fc !important;
-}
-
-.badge-purple {
-    background-color: #6b21a8 !important;
-    color: #f3e8ff !important;
-}
-
