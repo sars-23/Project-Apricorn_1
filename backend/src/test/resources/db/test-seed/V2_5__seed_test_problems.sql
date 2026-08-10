@@ -7,7 +7,7 @@ SELECT 1, 'a-b', 'A + B', 'EASY',
     'Two space-separated integers A and B.', 
     'Print a single integer representing A + B.', 
     '-10^9 <= A, B <= 10^9', 
-    '2 3', '5', '2 + 3 = 5.', 1000, 256, 1, CURRENT_TIMESTAMP
+    '2 3', '5', '2 + 3 = 5.', 3000, 256, 1, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'a-b');
 
 INSERT INTO test_cases (id, problem_id, input, expected_output, is_sample, order_index, created_at)

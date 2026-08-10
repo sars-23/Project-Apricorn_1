@@ -120,8 +120,9 @@ public class SprintAuditTest {
         Problem p = problemRepository.findBySlug("a-b").get();
         String code = "class Solution {\n" +
                 "    public int add(int a, int b) {\n" +
-                "        java.util.Scanner sc = new java.util.Scanner(System.in);\n" +
-                "        return a + b;\n" +
+                "        java.util.List<Integer> list = new java.util.ArrayList<>();\n" +
+                "        list.add(a + b);\n" +
+                "        return list.get(0);\n" +
                 "    }\n" +
                 "}\n";
         Submission sub = evaluateCode(p, code);
