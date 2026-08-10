@@ -233,12 +233,12 @@ The **Growth Dashboard** aggregates user activity into actionable analytics:
 graph TD
     Client["Client Browser (Monaco Editor & UI)"]
     
-    subgraph Spring Boot Backend
+    subgraph Backend["Spring Boot Backend"]
         Security["Spring Security & JWT Filter"]
         WebCtrl["Web Controllers (Thymeleaf Pages)"]
         RestCtrl["REST Controllers (JSON APIs)"]
         
-        subgraph Domain Services
+        subgraph DomainServices["Domain Services"]
             ProblemSvc["Problem Service"]
             SubSvc["Submission Service"]
             AnalyticsSvc["Analytics Service"]
@@ -248,11 +248,11 @@ graph TD
         end
     end
     
-    subgraph Persistence Layer
+    subgraph Persistence["Persistence Layer"]
         DB[("PostgreSQL 16 (Flyway V1-V12)")]
     end
     
-    subgraph Execution Infrastructure
+    subgraph Execution["Execution Infrastructure"]
         HarnessGen["Java Harness Generator"]
         DockerExec["Java Docker Executor"]
         DockerContainer["Isolated Docker Container (--network none, 256MB RAM)"]
@@ -262,10 +262,10 @@ graph TD
     Security --> WebCtrl
     Security --> RestCtrl
     
-    WebCtrl --> Domain Services
-    RestCtrl --> Domain Services
+    WebCtrl --> DomainServices
+    RestCtrl --> DomainServices
     
-    Domain Services --> DB
+    DomainServices --> DB
     SubSvc -->|Publish SubmissionCreatedEvent| JudgeSvc
     
     JudgeSvc --> HarnessGen
