@@ -85,7 +85,8 @@ class ProblemControllerTest {
         ProblemDetailResponse detail = new ProblemDetailResponse(
                 1L, "Two Sum", "two-sum", "Description", Difficulty.EASY,
                 "Format", "Format", "Constraints", "[2,7], 9", "[0,1]", "Explanation",
-                2000, 256, List.of(), Instant.now(), Instant.now(), "admin"
+                2000, 256, List.of(), Instant.now(), Instant.now(), "admin",
+                "class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        return new int[0];\n    }\n}"
         );
 
         when(problemService.getProblemBySlug("two-sum")).thenReturn(detail);
@@ -104,7 +105,7 @@ class ProblemControllerTest {
         ProblemDetailResponse detail = new ProblemDetailResponse(
                 10L, "Two Sum", "two-sum", "Description", Difficulty.EASY,
                 null, null, null, null, null, null,
-                2000, 256, List.of(), Instant.now(), Instant.now(), "admin@example.com"
+                2000, 256, List.of(), Instant.now(), Instant.now(), "admin@example.com", null
         );
 
         when(problemService.createProblem(any(CreateProblemRequest.class), eq("admin@example.com"))).thenReturn(detail);

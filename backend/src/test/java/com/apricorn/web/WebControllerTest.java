@@ -124,4 +124,20 @@ class WebControllerTest {
                 .andExpect(view().name("pages/problems"))
                 .andExpect(model().attributeExists("problemPage"));
     }
+
+    @Test
+    void workspace_ReturnsWorkspaceViewWithStarterCode() throws Exception {
+        com.apricorn.problem.dto.ProblemDetailResponse detail = new com.apricorn.problem.dto.ProblemDetailResponse(
+                1L, "Factorial", "factorial", "Calculate factorial", com.apricorn.problem.entity.Difficulty.EASY,
+                "Format", "Format", "Constraints", "5", "120", "Explanation",
+                2000, 256, java.util.List.of(), Instant.now(), Instant.now(), "admin",
+                "class Solution {\n    public long factorial(int n) {\n        return 1;\n    }\n}"
+        );
+        when(problemService.getProblemBySlug("factorial")).thenReturn(detail);
+
+        mockMvc.perform(get("/problems/factorial"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("pages/workspace"))
+                .andExpect(model().attributeExists("problem"));
+    }
 }

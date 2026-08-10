@@ -130,6 +130,7 @@ class ProblemServiceTest {
         problem.setSlug("two-sum");
         problem.setDescription("Find two numbers.");
         problem.setDifficulty(Difficulty.EASY);
+        problem.setStarterCode("class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        return new int[0];\n    }\n}");
 
         when(problemRepository.findDetailBySlug("two-sum")).thenReturn(Optional.of(problem));
 
@@ -137,6 +138,7 @@ class ProblemServiceTest {
 
         assertThat(response.title()).isEqualTo("Two Sum");
         assertThat(response.slug()).isEqualTo("two-sum");
+        assertThat(response.starterCode()).isEqualTo("class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        return new int[0];\n    }\n}");
     }
 
     @Test

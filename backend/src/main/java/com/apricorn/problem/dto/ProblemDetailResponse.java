@@ -21,5 +21,6 @@ public record ProblemDetailResponse(
         List<TagResponse> tags,
         Instant createdAt,
         Instant updatedAt,
-        String createdBy
+        String createdBy,
+        String starterCode
 ) {}

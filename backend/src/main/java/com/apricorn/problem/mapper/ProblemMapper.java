@@ -71,7 +71,8 @@ public class ProblemMapper {
                 tags,
                 problem.getCreatedAt(),
                 problem.getUpdatedAt(),
-                createdBy
+                createdBy,
+                problem.getStarterCode()
         );
     }
 }
