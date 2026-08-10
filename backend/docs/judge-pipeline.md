@@ -25,27 +25,28 @@ sequenceDiagram
     Listener->>Judge: judgeSubmissionAsync(submissionId)
     Judge->>DB: Update Submission status = RUNNING
     
+    Judge->>Harness: Generate Main.java (wraps Solution method)
     Judge->>Executor: execute(Submission, TestCases)
     Executor->>Executor: Create isolated temp host workspace
-    Executor->>Docker: docker run javac /code/Solution.java
+    Executor->>Docker: docker run javac Main.java Solution.java
     
     alt Compilation Error
         Docker-->>Executor: javac exit code != 0 (stdout/stderr error)
         Executor-->>Judge: Result (COMPILATION_ERROR, compilation log)
     else Compilation Success
-        loop For each Problem Test Case
-            Executor->>Docker: docker run java Solution (stdin = test.input)
+        loop For each Structured Test Case
+            Executor->>Docker: docker run java Main (executes test input JSON)
             alt Execution Timeout
                 Docker-->>Executor: Timeout exceeded (> timeLimitMs + 1000ms)
                 Executor-->>Judge: Result (TIME_LIMIT_EXCEEDED)
             else Runtime Exception
-                Docker-->>Executor: Non-zero exit code (Exception stack trace)
+                Docker-->>Executor: Exception thrown in Solution method
                 Executor-->>Judge: Result (RUNTIME_ERROR)
             else Output Mismatch
-                Docker-->>Executor: Standard output != expectedOutput
+                Docker-->>Executor: Serialized return value != expectedOutput JSON
                 Executor-->>Judge: Result (WRONG_ANSWER, diff details)
             else Correct Output
-                Docker-->>Executor: Standard output == expectedOutput
+                Docker-->>Executor: Return value == expectedOutput JSON
             end
         end
     end

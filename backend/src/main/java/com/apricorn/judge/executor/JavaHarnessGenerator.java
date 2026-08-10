@@ -13,7 +13,12 @@ public class JavaHarnessGenerator {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String generateHarness(Problem problem, List<TestCase> testCases) throws Exception {
-        JsonNode paramMetadata = objectMapper.readTree(problem.getParameterMetadata());
+        // Handle potential double-encoding: H2 stores JSON as text and @JdbcTypeCode(JSON)
+        // can return a quoted string node instead of the actual JSON array.
+        JsonNode metaRoot = objectMapper.readTree(problem.getParameterMetadata());
+        JsonNode paramMetadata = metaRoot.isTextual()
+                ? objectMapper.readTree(metaRoot.asText())
+                : metaRoot;
 
         StringBuilder sb = new StringBuilder();
         sb.append("import java.io.PrintWriter;\n");

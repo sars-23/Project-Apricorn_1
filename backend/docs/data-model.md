@@ -34,6 +34,10 @@ erDiagram
         text sample_input
         text sample_output
         text explanation
+        string method_name
+        string return_type
+        text parameter_metadata
+        text starter_code
         int time_limit_ms
         int memory_limit_mb
         timestamp created_at

@@ -51,7 +51,8 @@ public class CanonicalContractIntegrityTest {
             assertThat(SUPPORTED_TYPES).as("returnType supported for " + problem.getSlug())
                     .contains(problem.getReturnType());
 
-            JsonNode paramNode = objectMapper.readTree(problem.getParameterMetadata());
+            JsonNode metaRoot = objectMapper.readTree(problem.getParameterMetadata());
+            JsonNode paramNode = metaRoot.isTextual() ? objectMapper.readTree(metaRoot.asText()) : metaRoot;
             assertThat(paramNode.isArray()).as("parameterMetadata should be an array for " + problem.getSlug()).isTrue();
 
             for (JsonNode pNode : paramNode) {

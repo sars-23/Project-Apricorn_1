@@ -4,21 +4,20 @@
 [![Java](https://img.shields.io/badge/Java-21%20LTS-orange.svg)]()
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-green.svg)]()
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)]()
-[![Tests](https://img.shields.io/badge/tests-90%20passed-success.svg)]()
+[![Tests](https://img.shields.io/badge/tests-120%20passed-success.svg)]()
 
-Project Apricorn is a production-inspired, highly secure Online Judge backend API built with Java 21 LTS, Spring Boot 3.3.5, PostgreSQL 16, Flyway migrations, and a containerized Docker judge sandbox.
+Project Apricorn is a developer growth platform that combines Docker-isolated Java code judging with a function-based submission model, chronological Solution Journey tracking, deterministic Solution Insights, and comprehensive progress analytics.
 
 ---
 
 ## 🌟 Key Features
 
-- **Stateless Authentication & RBAC**: JWT bearer token authentication with role-based access control (`ROLE_USER`, `ROLE_ADMIN`) and BCrypt password hashing.
-- **Problem Management**: Full CRUD for coding problems with title, slug, difficulty, constraints, tags, sample cases, and hidden test-case isolation.
-- **Secure Docker-Based Judge Engine**: Isolated execution of untrusted Java code inside restricted Docker containers with `--network none`, CPU/Memory limits, and process caps.
-- **Asynchronous Execution Pipeline**: Bounded `ThreadPoolTaskExecutor` processing queue returning `202 Accepted` immediately.
-- **Analytics & User Dashboard**: UTC calendar coding streak calculation (`currentStreak`, `longestStreak`), distinct solved problem counts, difficulty breakdowns, and recent activity.
-- **Global Leaderboard & Rank Lookup**: Paginated competitive leaderboard ranked deterministically by solved count, hard solved count, medium solved count, acceptance rate, and username.
-- **Platform Analytics**: Admin-only platform overview providing active daily user metrics, submission volumes, and language/verdict distributions.
+- **Function-Based Java Judge Contract**: Users write algorithmic method logic (`Solution` class). Stdin/stdout boilerplate, parsing, and execution are handled cleanly by generated harnesses and structured JSON testcases.
+- **Solution Journey**: Chronological attempt timelines tracking progress from initial failure through accepted attempts to runtime and memory optimization personal bests.
+- **Deterministic Solution Insights**: Zero-latency, zero-cost, explainable feedback analyzing failure patterns, active blockers, breakthrough attempts, and weekly coding momentum without external AI hallucination risks.
+- **Developer Growth Dashboard**: Comprehensive progress tracking with difficulty breakdowns, acceptance rates, 14-day activity charts, verdict/language distributions, and continue-solving recommendations.
+- **Secure Docker-Based Sandbox**: Untrusted user code compiles and executes inside ephemeral Docker containers under strict network isolation (`--network none`), CPU/memory limits, and process caps.
+- **Stateless Auth & RBAC**: JWT authentication with role-based authorization (`USER`, `ADMIN`), BCrypt password hashing, and complete cross-user data isolation.
 
 ---
 
@@ -26,36 +25,39 @@ Project Apricorn is a production-inspired, highly secure Online Judge backend AP
 
 ```mermaid
 flowchart TD
-    Client[Client / REST API Request]
+    Client[Client Browser / Monaco Editor & UI]
     
     subgraph Spring Boot Backend
         SecurityFilter[Security Filter Chain & JWT Filter]
-        Controllers[REST Controllers]
-        Services[Domain & Analytics Services]
-        TaskExec[ThreadPoolTaskExecutor / judgeTaskExecutor]
+        WebControllers[Thymeleaf Page Controllers]
+        RestControllers[REST Controllers]
+        Services[Domain, Journey & Insights Services]
+        TaskExec[Async Judge Dispatcher]
     end
     
     subgraph Persistence Layer
-        Flyway[Flyway Migrations V1..V3]
+        Flyway[Flyway Migrations V1..V12]
         PostgreSQL[(PostgreSQL 16 Database)]
     end
     
     subgraph Online Judge Engine
-        JudgeService[DockerJudgeService / StubJudgeService]
-        Executor[JavaDockerExecutor Strategy]
-        Runner[DefaultDockerRunner]
+        JudgeService[DockerJudgeService]
+        HarnessGen[JavaHarnessGenerator]
+        DockerExec[JavaDockerExecutor]
         DockerContainer[Restricted Docker Sandbox Container]
     end
 
-    Client -->|HTTP / Bearer JWT| SecurityFilter
-    SecurityFilter --> Controllers
-    Controllers --> Services
+    Client -->|HTTP / Cookie / JWT| SecurityFilter
+    SecurityFilter --> WebControllers
+    SecurityFilter --> RestControllers
+    WebControllers --> Services
+    RestControllers --> Services
     Services --> PostgreSQL
     Services -->|Async Evaluate| TaskExec
     TaskExec --> JudgeService
-    JudgeService --> Executor
-    Executor --> Runner
-    Runner -->|docker run --network none| DockerContainer
+    JudgeService --> HarnessGen
+    JudgeService --> DockerExec
+    DockerExec -->|docker run --network none| DockerContainer
 ```
 
 ---
@@ -63,27 +65,10 @@ flowchart TD
 ## 💻 Technology Stack
 
 - **Core Framework**: Spring Boot 3.3.5, Java 21 LTS
-- **Persistence**: Spring Data JPA, Hibernate, PostgreSQL 16, Flyway
+- **Persistence**: Spring Data JPA, Hibernate, PostgreSQL 16, Flyway (Migrations V1–V12)
 - **Security**: Spring Security 6, JJWT (HMAC SHA-256), BCrypt
-- **Sandbox Containerization**: Docker (`eclipse-temurin:21-jdk` runtime)
-- **API Documentation**: OpenAPI 3.0 / Springdoc Swagger UI
-- **Testing & Coverage**: JUnit 5, Mockito, Spring Security Test, JaCoCo
-
----
-
-## 🛡️ Online Judge Security & Sandbox Controls
-
-Untrusted code submitted by users is NEVER executed directly on the host machine or inside the Spring Boot JVM. Execution takes place exclusively within restricted Docker containers:
-
-| Security Threat | Mitigation Control | Mechanism |
-|---|---|---|
-| Arbitrary Host Access | Docker Sandbox | Code runs inside container volume mounted strictly to a single workspace `/app`. |
-| Outbound Exfiltration | Network Isolation | Container launched with `--network none`. |
-| CPU Exhaustion / Loops | Resource Limit | `--cpus 0.5` + strict process execution timeout (`timeLimitMs`). |
-| Memory Exhaustion | Memory Limit | `--memory 256m` and `--memory-swap 256m`. |
-| Process Multiplication / Fork Bombs | PID Cap | `--pids-limit 64`. |
-| Privilege Escalation | Capability Drop | `--cap-drop ALL` and `--security-opt no-new-privileges`. |
-| Secret Test Leakage | Test Case Isolation | Hidden judge test inputs/outputs are never returned in API responses or public logs. |
+- **Sandbox Containerization**: Docker Engine (`eclipse-temurin:21-jdk`)
+- **Testing & Integration**: JUnit 5, Testcontainers PostgreSQL, Mockito, Spring Security Test
 
 ---
 
@@ -95,28 +80,30 @@ erDiagram
         bigint id PK
         varchar username UK
         varchar email UK
-        varchar password_hash
+        varchar password
         varchar role
         timestamp created_at
     }
 
     PROBLEMS {
         bigint id PK
-        varchar title UK
+        varchar title
         varchar slug UK
-        text description
         varchar difficulty
+        text description
         text input_format
         text output_format
         text constraints
         text sample_input
         text sample_output
-        text sample_explanation
+        text explanation
+        varchar method_name
+        varchar return_type
+        text parameter_metadata
+        text starter_code
         int time_limit_ms
         int memory_limit_mb
-        bigint created_by FK
         timestamp created_at
-        timestamp updated_at
     }
 
     TAGS {
@@ -155,14 +142,12 @@ erDiagram
         int total_test_cases
         text error_message
         timestamp submitted_at
-        timestamp updated_at
     }
 
     USERS ||--o{ SUBMISSIONS : "submits"
-    PROBLEMS ||--o{ SUBMISSIONS : "has"
+    PROBLEMS ||--o{ SUBMISSIONS : "evaluates"
     PROBLEMS ||--o{ TEST_CASES : "contains"
-    PROBLEMS }|--|{ TAGS : "categorized by (PROBLEM_TAGS)"
-    USERS ||--o{ PROBLEMS : "creates"
+    PROBLEMS }|--|{ TAGS : "categorized by"
 ```
 
 ---
@@ -172,8 +157,8 @@ erDiagram
 ### Prerequisites
 
 - Java 21 LTS
-- Maven 3.9+
-- Docker & Docker Compose
+- Docker Desktop or Docker Engine
+- Git
 
 ### 1. Launch PostgreSQL Container
 
@@ -181,65 +166,47 @@ erDiagram
 docker compose up -d
 ```
 
-### 2. Configure Environment Variables
-
-Copy `.env.example` to set local credentials:
-```bash
-export JWT_SECRET="your-super-secret-key-at-least-32-bytes-long"
-export JUDGE_MODE="stub" # Set to "docker" for container evaluation
-```
-
-### 3. Run Application
+### 2. Run Application
 
 ```bash
 cd backend
-mvn spring-boot:run
+export JWT_SECRET="SuperSecretLocalDevSigningKeyWhichIsAtLeast32CharsLong!"
+export SPRING_PROFILES_ACTIVE="dev"
+./mvnw spring-boot:run
 ```
-
-### 4. Interactive API Documentation
-
-Access Swagger UI in browser:
-- `http://localhost:8080/swagger-ui.html`
-- `http://localhost:8080/api-docs`
 
 ---
 
-## 🧪 Testing & Code Coverage
+## 🧪 Testing & Verification
 
-Run the complete 90-test automated test suite:
+Run the full 120-test automated verification suite with Docker enabled:
 
 ```bash
 cd backend
-mvn clean test
+$env:DOCKER_AVAILABLE="true" # PowerShell or export DOCKER_AVAILABLE=true in Bash
+./mvnw clean test
 ```
 
-Generate JaCoCo code coverage report:
+Build production executable JAR:
 ```bash
-mvn clean package
-# Open target/site/jacoco/index.html in browser
+./mvnw clean package
 ```
 
-Executable production JAR generated at:
-`backend/target/apricorn-backend-0.0.1-SNAPSHOT.jar`
+Build production Docker image:
+```bash
+docker build -t apricorn-backend:1.0.0 .
+```
 
 ---
 
-## 📐 Engineering Decisions & Trade-offs
+## 📑 Detailed Architecture Documentation
 
-1. **Distinct Problem Solved Definition**: A problem counts as solved when at least one `ACCEPTED` submission exists for the user. Multiple accepted solutions for the same problem count as **one** solved problem.
-2. **Strategy Pattern Decoupling**: Language execution (`LanguageExecutor`) and container process runner (`DockerRunner`) are cleanly decoupled to allow effortless addition of future runtime engines.
-3. **Database-Side Aggregation**: Leaderboard rankings, problem stats, and difficulty breakdowns execute via database-side aggregate queries (`COUNT DISTINCT`, `GROUP BY`) to prevent N+1 queries and memory bloat.
-
----
-
-## 📑 Detailed Documentation
-
-- [Submissions Module Documentation](docs/submissions.md)
-- [Judge Architecture Specification](docs/judge.md)
-- [Judge Security Threat Model](docs/judge-security.md)
-- [Analytics & Leaderboard Specification](docs/analytics.md)
-- [Admin Account Setup Guide](docs/admin-setup.md)
-- [Architecture & ER Diagrams](docs/architecture.md)
+- [Deployment Guide](docs/DEPLOYMENT.md)
+- [Architecture Specification](docs/architecture.md)
+- [Judge Pipeline Specification](docs/judge-pipeline.md)
+- [Security & Sandbox Specification](docs/security.md)
+- [Data & Domain Model Specification](docs/data-model.md)
+- [Engineering Decisions (ADRs)](docs/engineering-decisions.md)
 
 ---
 

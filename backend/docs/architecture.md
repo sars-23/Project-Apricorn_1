@@ -26,11 +26,12 @@ graph TD
     end
     
     subgraph Persistence Layer
-        DB[("PostgreSQL Database (Flyway V1-V9)")]
+        DB[("PostgreSQL Database (Flyway V1-V12)")]
     end
     
     subgraph Execution Infrastructure
         DockerExec["Java Docker Executor"]
+        HarnessGen["Java Harness Generator"]
         DockerEngine["Local Docker Engine Daemon"]
         Container["Isolated Java Runner Container (--network none, 256MB, 0.5 CPU)"]
     end
@@ -50,9 +51,10 @@ graph TD
     SubSvc -->|Dispatch Async Event| JudgeSvc
     
     JudgeSvc -->|Update RUNNING / COMPLETED| DB
+    JudgeSvc --> HarnessGen
     JudgeSvc --> DockerExec
     DockerExec -->|Docker API / CLI| DockerEngine
-    DockerEngine -->|Run javac & java| Container
+    DockerEngine -->|Run javac Main.java & java Main| Container
     
     AnalyticsSvc --> DB
     JourneySvc --> DB
@@ -77,8 +79,9 @@ graph TD
 - **Solution Insights Service**: Executes deterministic analysis over submission history to identify failure patterns and active blockers.
 
 ### Persistence Layer (`com.apricorn.*.repository`, `com.apricorn.*.entity`)
-- Managed by Spring Data JPA and Flyway schema migrations (`V1` through `V9`).
+- Managed by Spring Data JPA and Flyway schema migrations (`V1` through `V12`).
 - Indexed for user-scoped queries and chronological timeline queries (`idx_submissions_user_problem_submitted_at`).
 
 ### Execution Infrastructure (`com.apricorn.judge.executor`)
-- `JavaDockerExecutor` launches short-lived Docker containers (`eclipse-temurin:21-jdk`) for isolated code compilation and test-case execution under strict memory, CPU, and network constraints.
+- `JavaHarnessGenerator`: Constructs executable `Main.java` wrappers that parse structured testcase parameters, invoke user `Solution` methods, serialize returns to `result.out`, and sanitize user standard output.
+- `JavaDockerExecutor`: Launches short-lived Docker containers (`eclipse-temurin:21-jdk`) for isolated code compilation and test-case execution under strict memory, CPU, and network constraints.

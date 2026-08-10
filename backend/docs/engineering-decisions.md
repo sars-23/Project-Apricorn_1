@@ -13,7 +13,7 @@ This document records the major engineering decisions, trade-offs, and future sc
 
 ## ADR 2: PostgreSQL & Flyway Schema Migrations
 - **Context**: Relational database with strict data consistency requirements for user accounts, submissions, and problem catalogs.
-- **Decision**: PostgreSQL 16 managed by Flyway migrations (`V1` through `V9`).
+- **Decision**: PostgreSQL 16 managed by Flyway migrations (`V1` through `V12`).
 - **Rationale**: Enables version-controlled schema evolution and reproducible fresh database setups without manual SQL execution.
 
 ---
