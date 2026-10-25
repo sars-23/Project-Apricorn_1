@@ -8,7 +8,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Sandbox-2496ED.svg)]()
 [![Flyway](https://img.shields.io/badge/Flyway-V1--V12-red.svg)]()
 [![Testcontainers](https://img.shields.io/badge/Testcontainers-PostgreSQL-black.svg)]()
-[![Tests](https://img.shields.io/badge/tests-120%20passed-success.svg)]()
+[![Testing](https://img.shields.io/badge/Testing-JUnit%205%20%7C%20Testcontainers-blue.svg)]()
 
 Apricorn is a Java-powered developer growth platform that combines Docker-isolated code judging with Solution Journey, deterministic coding insights, and progress analytics.
 
@@ -77,7 +77,7 @@ Instead of discarding past failed attempts or treating code submissions as trans
 | **JWT Authentication** | Stateless security using HttpOnly cookies for web UI and Bearer tokens for REST API requests. | **Verified (V1)** |
 | **User Data Isolation** | Server-side security checks ensuring users cannot view or mutate another user's private submissions or insights. | **Verified (V1)** |
 | **PostgreSQL + Flyway** | Schema versioning (`V1` through `V12`) managing user accounts, problem metadata, testcases, and submissions. | **Verified (V1)** |
-| **Testcontainers Test Suite** | 120 automated tests running against Testcontainers PostgreSQL and real Docker sandbox execution. | **Verified (V1)** |
+| **Automated Test Suites** | Comprehensive unit, slice, and integration tests with Testcontainers PostgreSQL and Docker execution. | **Verified (V1)** |
 | **Responsive Web UI** | Modern Thymeleaf + Vanilla CSS web interface optimized for desktop, tablet, and mobile browsers. | **Verified (V1)** |
 
 ---
@@ -118,11 +118,12 @@ Typed Output Comparison (Spring Boot server side)
 Save Verdict (ACCEPTED / WRONG_ANSWER / RUNTIME_ERROR / TLE / CE)
 ```
 
-### Docker Execution Security Boundary
-Native kernel namespaces and cgroups provide strict container isolation:
-- **Network Isolation**: `--network none` blocks outbound socket connections, HTTP requests, or exfiltration.
-- **Resource Caps**: Capped at `256m` RAM and `0.5` CPU core to prevent resource exhaustion or infinite loop starvation.
-- **Auto Cleanup**: Ephemeral containers are removed upon exit (`--rm`), and temporary host workspaces are deleted in a `finally` block.
+### Docker Execution Boundary & Resource Controls
+Container execution leverages Docker kernel namespaces and cgroups to constrain untrusted code within defined operational boundaries:
+- **Network Isolation**: Containers are executed with `--network none` to block outbound socket connections and external network access during execution.
+- **Resource Quotas**: Memory is capped at `256m` and CPU allocation is limited to `0.5` cores to mitigate resource exhaustion from infinite loops.
+- **Ephemeral Lifecycles**: Containers are executed with `--rm` for automated removal upon exit, and temporary host execution directories are deleted in a `finally` block.
+- **Execution Boundary Scope**: These controls provide effective operational sandboxing for educational and practice code judging. As with single-node Docker setups, this provides process and namespace containment rather than hardened multi-tenant hypervisor virtualization.
 
 ---
 
@@ -366,22 +367,22 @@ docker build -t apricorn-backend:1.0.0 .
 
 ---
 
-## 🧪 Testing
+## 🧪 Automated Testing Architecture
 
-Project Apricorn includes a comprehensive 120-test automated verification suite covering unit tests, controller slice tests, security authorization checks, Flyway schema migrations, and real Docker judge execution:
+Project Apricorn is structured with multi-layered test suites covering application domains, persistence, security, and execution:
+- **Domain & Service Unit Tests**: Validates problem lookup, submission life cycles, deterministic insight calculations, and verdict evaluation.
+- **Security & Controller Slice Tests**: Verifies JWT cookie authentication, route authorization, owner-based data isolation, and MVC endpoints.
+- **Flyway Schema & Persistence Tests**: Uses Testcontainers PostgreSQL to validate database schema migrations (`V1` through `V12`) against a real database instance.
+- **Docker Judge Integration Tests**: Exercises containerized Java compilation and execution when a local Docker daemon is present.
 
 ```bash
 cd backend
-# Set DOCKER_AVAILABLE=true to enable container execution tests
-$env:DOCKER_AVAILABLE="true"
+# Run test suite
+# Note: Container-dependent judge tests require an active local Docker daemon
 .\mvnw.cmd clean test
 ```
 
-### Test Verification Summary
-- **Tests run**: 120
-- **Failures**: 0
-- **Errors**: 0
-- **Skipped**: 0
+> **Environment Note:** Tests that exercise containerized code judging require an accessible local Docker daemon. In environments without an active Docker daemon, container execution tests are conditionally bypassed while unit, security, and persistence tests execute normally.
 
 ---
 
