@@ -459,4 +459,4 @@ Distributed under the MIT License. See `LICENSE` for details.
 
 ## 👤 Author & Credits
 
-**Project Apricorn** was designed and implemented by [Saransh](https://github.com/saransh9822).
+**Project Apricorn** was designed and implemented by [Saransh](https://github.com/sars-23).
